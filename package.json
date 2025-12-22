@@ -1,0 +1,20 @@
+{
+  "name": "kingsocial-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "tsc -b",
+    "lint": "turbo run lint"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.12.1",
+  "devDependencies": {
+    "turbo": "^2.7.1",
+    "typescript": "^5.9.3"
+  }
+}
