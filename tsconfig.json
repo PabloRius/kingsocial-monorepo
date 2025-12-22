@@ -4,6 +4,11 @@
     { "path": "packages/shared-types" },
     { "path": "packages/shared-models" },
     { "path": "apps/users-service" },
+    { "path": "apps/authentication" },
+    { "path": "apps/chat-messaging" },
+    { "path": "apps/communities-events" },
+    { "path": "apps/marketplace" },
+    { "path": "apps/profile-management" },
     { "path": "apps/web" }
   ]
 }
