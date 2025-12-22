@@ -1,5 +1,5 @@
 {
-  "name": "@repo/chat-messaging",
+  "name": "@repo/authentication",
   "private": true,
   "scripts": {
     "dev": "tsx watch src/server.ts",
