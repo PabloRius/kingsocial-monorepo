@@ -1,0 +1,17 @@
+{
+  "name": "@repo/communities-events",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@repo/shared-models": "workspace:*",
+    "@repo/shared-types": "workspace:*",
+    "@types/express": "^5.0.6",
+    "express": "^4.22.1"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.0"
+  }
+}
