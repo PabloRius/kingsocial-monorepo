@@ -11,10 +11,8 @@
       "@repo/shared-types": ["../../packages/shared-types/src/index.ts"],
       "@/*": ["./src/*"]
     },
-    "moduleResolution": "bundler",
     "incremental": true,
-    "plugins": [{ "name": "next" }],
-    "module": "esnext"
+    "plugins": [{ "name": "next" }]
   },
   "include": [
     "next-env.d.ts",
