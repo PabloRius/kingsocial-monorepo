@@ -1,11 +1,13 @@
 {
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+      "dependsOn": ["^db:generate", "^build"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      "env": ["DATABASE_URL"]
     },
-    "dev": {
-      "cache": false
+    "db:generate": {
+      "cache": false,
+      "env": ["DATABASE_URL"]
     }
   }
 }

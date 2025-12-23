@@ -1,0 +1,288 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+
+// Prisma auth adapter - start
+model User {
+  id                      String            @id @default(auto()) @map("_id") @db.ObjectId
+  name                    String?
+  email                   String?           @unique
+  emailVerified           DateTime?
+  image                   String?
+  accounts                Account[]
+  sessions                Session[]
+ 
+  createdAt               DateTime          @default(now())
+  updatedAt               DateTime          @updatedAt
+
+  sellerProfile           SellerProfile?
+  biography               String?
+  instagram               String?
+  linkedin                String?
+  coverImage              String?
+
+  bookmarkedProducts      String[]          @default([])
+
+  chats                   ChatParticipant[]
+  messages                Message[]
+
+  communities             CommunityMember[]
+  communityJoinRequests   CommunityJoinRequest[]
+  
+  events_attendee         EventParticipant[]
+
+  // AI fields
+  interests               String []
+  embedding               Json?
+  embeddingCount          Int               @default(0)
+}
+ 
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.String
+  access_token      String? @db.String
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.String
+  session_state     String?
+ 
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@unique([provider, providerAccountId])
+}
+ 
+model Session {
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String     @unique
+  userId       String     @db.ObjectId
+  expires      DateTime
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+ 
+model VerificationToken {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  identifier String
+  token      String
+  expires    DateTime
+ 
+  @@unique([identifier, token])
+}
+
+// Prisma auth adapter - end
+
+// App-specific schemas - start
+
+model SellerProfile {
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String        @unique @db.ObjectId
+  products  Product[]
+  plan      String        @default("basic")
+  totalSales Int          @default(0)
+}
+
+model Product {
+  id              String          @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  description     String
+  price           Float
+  pickupLocation  String
+  condition       String
+  category        String
+  tags            String[]
+  photos          String[]
+
+  status          String          @default("active")
+  views           Int             @default(0)
+  bookmarks       Int             @default(0)
+  references      Message[]
+  
+  seller          SellerProfile?  @relation(fields: [sellerId], references: [id], onDelete: SetNull)
+  sellerId        String?         @db.ObjectId
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  soldAt          DateTime?
+}
+
+model Message {
+  id            String      @id @default(auto()) @map("_id") @db.ObjectId
+  chatId        String      @db.ObjectId
+  senderId      String      @db.ObjectId
+  content       String
+  createdAt     DateTime    @default(now())
+  
+  productRefId  String?     @db.ObjectId
+  productRef    Product?    @relation(fields: [productRefId], references: [id])
+
+  eventRefId    String?     @db.ObjectId
+  eventRef      Event?      @relation(fields: [eventRefId], references: [id])
+
+  chat          Chat        @relation(fields: [chatId], references: [id])
+  sender        User        @relation(fields: [senderId], references: [id])
+}
+
+model ChatParticipant {
+  id     String       @id @default(auto()) @map("_id") @db.ObjectId
+  chatId String       @db.ObjectId
+  userId String       @db.ObjectId
+
+  chat   Chat         @relation(fields: [chatId], references: [id])
+  user   User         @relation(fields: [userId], references: [id])
+
+  @@unique([chatId, userId])
+}
+
+model Chat {
+  id              String              @id @default(auto()) @map("_id") @db.ObjectId
+
+  participants    ChatParticipant[]
+  messages        Message[]
+
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+}
+
+model CommunityMember {
+  id              String                @id @default(auto()) @map("_id") @db.ObjectId
+
+  role            String                @default("member")
+  chatAlerts      Boolean               @default(true)
+  
+  userId          String                @db.ObjectId
+  communityId     String                @db.ObjectId
+
+  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  community       Community             @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  messages        CommunityMessage[]
+
+  events_created  Event[]               @relation("EventsCreatedByMember")
+
+  joinedAt        DateTime              @default(now())
+
+  @@unique([userId, communityId])
+}
+
+model CommunityMessage {
+  id            String            @id @default(auto()) @map("_id") @db.ObjectId
+
+  communityId   String            @db.ObjectId
+  senderId      String?           @db.ObjectId
+
+  content       String
+  createdAt     DateTime          @default(now())
+
+  community     Community         @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  sender        CommunityMember?  @relation(fields: [senderId], references: [id], onDelete: SetNull)
+}
+
+model Community {
+  id            String                  @id @default(auto()) @map("_id") @db.ObjectId
+
+  name          String
+  description   String
+  coverImage    String
+
+  mode          String                  @default("public")
+
+  members       CommunityMember[]
+  chat          CommunityMessage[]
+
+  joinRequests  CommunityJoinRequest[]
+
+  events        Event[]
+
+  createdAt     DateTime                @default(now())
+  
+  // AI fields
+  embedding       Json?
+}
+
+model CommunityJoinRequest {
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+
+  message       String?
+  status        String        @default("pending")
+  
+  userId        String        @db.ObjectId
+  communityId   String        @db.ObjectId
+
+  createdAt     DateTime      @default(now())
+  
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  community     Community     @relation(fields: [communityId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, communityId])
+}
+
+model EventParticipant {
+  id                  String              @id @default(auto()) @map("_id") @db.ObjectId
+
+  role                String              @default("participant")
+  allowsMassMessages  Boolean             @default(true)
+  
+  userId              String              @db.ObjectId
+  eventId             String              @db.ObjectId
+
+  user                User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event               Event               @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  joinedAt            DateTime            @default(now())
+
+  @@unique([userId, eventId])
+}
+
+model Event {
+  id              String                @id @default(auto()) @map("_id") @db.ObjectId
+
+  title           String
+  description     String
+  tags            String[]
+  coverImage      String
+
+  location_format String
+  location        String?
+
+  date            DateTime
+  all_day         Boolean
+  start_time      String?
+  end_time        String?
+
+  capacity        Int?
+  public          Boolean
+     
+  communityId     String                @db.ObjectId
+  creatorId       String?               @db.ObjectId
+
+  community       Community             @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  creator         CommunityMember?      @relation("EventsCreatedByMember", fields: [creatorId], references: [id], onDelete: SetNull)
+  participants    EventParticipant[]
+
+  references      Message[]
+
+  // AI fields
+  embedding       Json?
+}

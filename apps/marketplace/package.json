@@ -1,5 +1,5 @@
 {
-  "name": "@repo/users-service",
+  "name": "@repo/marketplace",
   "private": true,
   "scripts": {
     "dev": "tsx watch src/server.ts",
