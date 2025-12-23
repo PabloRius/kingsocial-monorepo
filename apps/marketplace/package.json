@@ -1,9 +1,10 @@
 {
   "name": "@repo/marketplace",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.ts",
-    "build": "tsc"
+    "build": "tsc -b"
   },
   "dependencies": {
     "@repo/database": "workspace:*",

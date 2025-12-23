@@ -2,10 +2,17 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "dist",
-    "composite": true
+    "rootDir": "src",
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@repo/shared-types": ["../../packages/shared-types/src/index.ts"],
+      "@repo/database": ["../../packages/database/index.ts"]
+    }
   },
   "include": ["src"],
-  "paths": {
-    "@repo/*": ["../../packages/*/src"]
-  }
+  "references": [
+    { "path": "../../packages/shared-types" },
+    { "path": "../../packages/database" }
+  ]
 }
