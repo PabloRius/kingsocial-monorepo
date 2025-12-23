@@ -1,7 +1,7 @@
 {
   "tasks": {
     "build": {
-      "dependsOn": ["^db:generate", "^build"],
+      "dependsOn": ["^db:generate", "db:generate", "^build"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
       "env": ["DATABASE_URL"]
     },
