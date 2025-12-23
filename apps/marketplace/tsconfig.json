@@ -6,8 +6,8 @@
     "composite": true,
     "baseUrl": ".",
     "paths": {
-      "@repo/shared-types": ["../../packages/shared-types/src/index.ts"],
-      "@repo/database": ["../../packages/database/src/index.ts"]
+      "@repo/shared-types": ["../../packages/shared-types/dist/index.ts"],
+      "@repo/database": ["../../packages/database/dist/index.ts"]
     }
   },
   "include": ["src"]
