@@ -4,11 +4,7 @@
     "outDir": "dist",
     "rootDir": "src",
     "composite": true,
-    "baseUrl": ".",
-    "paths": {
-      "@repo/shared-types": ["../../packages/shared-types/dist/index.ts"],
-      "@repo/database": ["../../packages/database/dist/index.ts"]
-    }
+    "baseUrl": "."
   },
   "include": ["src"]
 }
