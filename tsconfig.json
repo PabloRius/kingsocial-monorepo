@@ -2,8 +2,7 @@
   "files": [],
   "references": [
     { "path": "packages/shared-types" },
-    { "path": "packages/shared-models" },
-    { "path": "apps/users-service" },
+    { "path": "apps/marketplace" },
     { "path": "apps/web" }
   ]
 }
