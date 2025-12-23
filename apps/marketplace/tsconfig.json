@@ -10,9 +10,5 @@
       "@repo/database": ["../../packages/database/src/index.ts"]
     }
   },
-  "include": ["src"],
-  "references": [
-    { "path": "../../packages/shared-types" },
-    { "path": "../../packages/database" }
-  ]
+  "include": ["src"]
 }
