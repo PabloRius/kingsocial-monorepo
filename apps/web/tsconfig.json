@@ -3,7 +3,16 @@
   "compilerOptions": {
     "jsx": "preserve",
     "noEmit": true,
-    "composite": true
+    "composite": true,
+    "baseUrl": ".",
+    "paths": {
+      "@repo/shared-types": ["../../packages/shared-types/src/index.ts"]
+    }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "../../packages/shared-types/src/**/*"
+  ]
 }

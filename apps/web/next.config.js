@@ -1,6 +1,7 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+/** @type {import('next').NextConfig} */
 const nextConfig = {
-    transpilePackages: ["@repo/shared-types", "@repo/shared-models"],
+  transpilePackages: ["@repo/shared-types"],
+  // ... resto de tu config
 };
-exports.default = nextConfig;
+
+export default nextConfig;
