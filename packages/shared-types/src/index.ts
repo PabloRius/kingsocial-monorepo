@@ -10,4 +10,4 @@ export interface ApiResponse<T> {
   error?: string;
 }
 
-export * from "./marketplace.js";
+export * from "./marketplace";
