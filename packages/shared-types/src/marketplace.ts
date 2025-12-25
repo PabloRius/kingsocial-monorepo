@@ -42,3 +42,34 @@ export const MarketplaceResponseSchema = z.object({
 });
 
 export type MarketplaceResponse = z.infer<typeof MarketplaceResponseSchema>;
+
+export const GetMarketplaceQuerySchema = z.object({
+  query: z.object({
+    page: z
+      .string()
+      .optional()
+      .transform((v) => parseInt(v || "1"))
+      .default(1),
+    limit: z
+      .string()
+      .optional()
+      .transform((v) => parseInt(v || "10"))
+      .default(10),
+    search: z.string().optional(),
+    category: CategoryEnum.optional(),
+    condition: ConditionEnum.optional(),
+    minPrice: z
+      .string()
+      .optional()
+      .transform((v) => (v ? parseFloat(v) : undefined)),
+    maxPrice: z
+      .string()
+      .optional()
+      .transform((v) => (v ? parseFloat(v) : undefined)),
+    userId: z.string().optional(),
+  }),
+});
+
+export type GetMarketplaceQuery = z.infer<
+  typeof GetMarketplaceQuerySchema
+>["query"];

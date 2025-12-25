@@ -10,7 +10,8 @@
     "@repo/database": "workspace:*",
     "@repo/shared-types": "workspace:*",
     "@types/express": "^5.0.6",
-    "express": "^4.22.1"
+    "express": "^4.22.1",
+    "zod": "^4.2.1"
   },
   "devDependencies": {
     "tsx": "^4.7.0"
