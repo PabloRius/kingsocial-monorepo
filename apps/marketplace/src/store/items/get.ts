@@ -80,3 +80,24 @@ export async function getAll(
     limit,
   };
 }
+
+export async function getById(id: string): Promise<ProductDTO | null> {
+  const product = await prisma.product.findUnique({
+    where: { id },
+    select: marketplaceProductSelect,
+  });
+
+  return product as unknown as ProductDTO;
+}
+
+export async function getByUserId(userId: string): Promise<ProductDTO[]> {
+  const products = await prisma.product.findMany({
+    where: {
+      sellerId: userId,
+    },
+    select: marketplaceProductSelect,
+    orderBy: { createdAt: "desc" },
+  });
+
+  return products as unknown as ProductDTO[];
+}

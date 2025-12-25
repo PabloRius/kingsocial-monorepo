@@ -20,4 +20,25 @@ router.get(
   )
 );
 
+router.get(
+  "/:id",
+  asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const result = await ItemService.getItemById(id);
+
+    res.json({ success: true, data: result });
+  })
+);
+
+router.get(
+  "/user/:userId",
+  asyncHandler(async (req: Request, res: Response) => {
+    const { userId } = req.params;
+
+    const result = await ItemService.getUserInventory(userId);
+
+    res.json({ success: true, data: result });
+  })
+);
+
 export default router;
