@@ -26,7 +26,7 @@ const marketplaceProductSelect = {
       },
     },
   },
-} satisfies Prisma.ProductSelect;
+} satisfies Prisma.ProductSelect & Record<keyof ProductDTO, any>;
 
 export async function getAll(
   page: number,

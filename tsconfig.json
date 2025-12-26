@@ -2,7 +2,10 @@
   "files": [],
   "references": [
     { "path": "packages/shared-types" },
+    { "path": "packages/database" },
+    { "path": "packages/backend-utils" },
     { "path": "apps/marketplace" },
+    { "path": "apps/profile-management" },
     { "path": "apps/web" }
   ]
 }

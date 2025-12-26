@@ -1,3 +1,4 @@
+import { Errors } from "@repo/backend-utils";
 import { GetMarketplaceQuery } from "@repo/shared-types";
 import * as ItemStore from "../store/items";
 
@@ -13,7 +14,7 @@ export async function getMarketplaceCatalog(query: GetMarketplaceQuery) {
 
 export async function getItemById(id: string) {
   const item = await ItemStore.getById(id);
-  if (!item) throw new Error("Item not found");
+  if (!item) throw new Errors.APIError("Item not found", 404);
   return item;
 }
 

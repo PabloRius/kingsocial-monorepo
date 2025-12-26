@@ -1,5 +1,5 @@
+import { Middleware } from "@repo/backend-utils";
 import express, { type Application } from "express";
-import { errorHandler } from "./middleware/error";
 import itemsRouter from "./routes/items";
 
 export const app: Application = express();
@@ -7,6 +7,6 @@ app.use(express.json());
 
 app.use("/items", itemsRouter);
 
-app.use(errorHandler);
+app.use(Middleware.errorHandler);
 
 export default app;

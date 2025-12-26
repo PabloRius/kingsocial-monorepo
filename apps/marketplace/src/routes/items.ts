@@ -1,17 +1,16 @@
+import { Middleware, Utils } from "@repo/backend-utils";
 import {
   GetMarketplaceQuery,
   GetMarketplaceQuerySchema,
 } from "@repo/shared-types";
 import { Request, Response, Router } from "express";
-import { validate } from "src/middleware/validate";
-import { asyncHandler } from "src/utils/asyncHandler";
 import * as ItemService from "../services/items.service";
 const router: Router = Router();
 
 router.get(
   "/",
-  validate(GetMarketplaceQuerySchema),
-  asyncHandler(
+  Middleware.validate(GetMarketplaceQuerySchema),
+  Utils.asyncHandler(
     async (req: Request<{}, any, any, GetMarketplaceQuery>, res: Response) => {
       const result = await ItemService.getMarketplaceCatalog(req.query);
 
@@ -22,7 +21,7 @@ router.get(
 
 router.get(
   "/:id",
-  asyncHandler(async (req: Request, res: Response) => {
+  Utils.asyncHandler(async (req: Request, res: Response) => {
     const { id } = req.params;
     const result = await ItemService.getItemById(id);
 
@@ -32,7 +31,7 @@ router.get(
 
 router.get(
   "/user/:userId",
-  asyncHandler(async (req: Request, res: Response) => {
+  Utils.asyncHandler(async (req: Request, res: Response) => {
     const { userId } = req.params;
 
     const result = await ItemService.getUserInventory(userId);
