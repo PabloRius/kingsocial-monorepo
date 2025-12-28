@@ -1,7 +1,13 @@
 export interface ApiResponse<T> {
-  success: boolean;
+  success: true;
   data: T;
   error?: string;
+}
+
+export interface ApiErrorResponse {
+  success: false;
+  error: string;
+  details?: Record<string, string>;
 }
 
 export * from "./profile";

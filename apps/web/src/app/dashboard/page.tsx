@@ -1,6 +1,5 @@
 "use client";
 
-import { Footer } from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCount } from "@/lib/formatters";
@@ -366,7 +365,6 @@ export default function DashboardPage() {
           </aside>
         </div>
       </main>
-      <Footer />
     </>
   );
 }

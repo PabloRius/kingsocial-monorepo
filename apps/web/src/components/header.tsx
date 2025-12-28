@@ -1,7 +1,7 @@
 "use client";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { HeaderExpanded } from "./expanded-header";
+import { HeaderExpanded } from "./ExpandedHeader";
 
 export const Header = () => {
   const { status } = useSession();
@@ -14,7 +14,7 @@ export const Header = () => {
             : "left-6"
         } transition-all flex justify-center hover:scale-110`}
       >
-        <Link href="/" className="flex justify-center">
+        <Link href="/dashboard" className="flex justify-center">
           <div className="relative flex items-center">
             <span className="text-3xl py-2 font-bold bg-clip-text text-transparent bg-linear-to-r from-celestial-blue-500 to-picton-blue-500">
               King

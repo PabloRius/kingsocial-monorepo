@@ -1,5 +1,6 @@
 "use client";
 
+import { SignInWithGoogleButton } from "@/components/buttons/SignInWithGoogleButton";
 import { SignInWithMicrosoftButton } from "@/components/buttons/SignInWithMicrosoftButton";
 import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -39,7 +40,10 @@ export default function Home() {
           Connect with the Kingston Univeristy community and level up your
           social life.
         </p>
-        <SignInWithMicrosoftButton />
+        <div className="flex flex-col gap-4">
+          <SignInWithMicrosoftButton />
+          <SignInWithGoogleButton />
+        </div>
       </div>
       <div className="pt-4">
         <p className="text-sm text-gray-600 dark:text-gray-400">

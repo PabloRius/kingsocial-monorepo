@@ -2,6 +2,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@repo/database";
 import NextAuth from "next-auth";
 import type { Provider } from "next-auth/providers";
+import Google from "next-auth/providers/google";
 import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -12,6 +13,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       clientSecret: process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET!,
       issuer: process.env.AUTH_MICROSOFT_ENTRA_ID_ISSUER,
     }) as Provider,
+    Google({
+      clientId: process.env.AUTH_GOOGLE_ID!,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET!,
+      authorization: {
+        params: {
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code",
+        },
+      },
+    }),
   ],
   callbacks: {
     async session({ session, user }) {

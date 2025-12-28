@@ -11,10 +11,12 @@ const profileSelect = {
   linkedin: true,
   coverImage: true,
   createdAt: true,
+  bookmarkedProducts: true,
 
   sellerProfile: {
     select: {
       id: true,
+      plan: true,
       products: {
         select: {
           id: true,

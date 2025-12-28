@@ -1,12 +1,12 @@
 import { prisma, Prisma } from "@repo/database";
 import {
-  Category,
-  Condition,
+  CategoryFilter,
+  ConditionFilter,
   MarketplaceResponse,
   ProductDTO,
 } from "@repo/shared-types";
 
-const marketplaceProductSelect = {
+export const marketplaceProductSelect = {
   id: true,
   name: true,
   description: true,
@@ -14,10 +14,17 @@ const marketplaceProductSelect = {
   photos: true,
   category: true,
   condition: true,
+  pickupLocation: true,
   createdAt: true,
+  tags: true,
+  status: true,
+  bookmarks: true,
+  views: true,
+  soldAt: true,
   seller: {
     select: {
       id: true,
+      userId: true,
       user: {
         select: {
           name: true,
@@ -34,8 +41,8 @@ export async function getAll(
   userId?: string,
   filters: {
     search?: string;
-    category?: Category;
-    condition?: Condition;
+    category?: CategoryFilter;
+    condition?: ConditionFilter;
     minPrice?: number;
     maxPrice?: number;
   } = {}
@@ -93,7 +100,7 @@ export async function getById(id: string): Promise<ProductDTO | null> {
 export async function getByUserId(userId: string): Promise<ProductDTO[]> {
   const products = await prisma.product.findMany({
     where: {
-      sellerId: userId,
+      seller: { userId },
     },
     select: marketplaceProductSelect,
     orderBy: { createdAt: "desc" },

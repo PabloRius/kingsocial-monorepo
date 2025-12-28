@@ -1,4 +1,5 @@
 import z from "zod";
+import { SellerPlanEnum } from "./marketplace";
 
 export const ProfileDTOSchema = z.object({
   id: z.string(),
@@ -10,9 +11,11 @@ export const ProfileDTOSchema = z.object({
   image: z.string().nullable(),
   coverImage: z.string().nullable(),
   createdAt: z.date().or(z.string()),
+  bookmarkedProducts: z.array(z.string()),
   sellerProfile: z
     .object({
       id: z.string(),
+      plan: SellerPlanEnum,
       products: z.array(
         z.object({
           id: z.string(),

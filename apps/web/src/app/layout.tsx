@@ -1,5 +1,5 @@
-import { Header } from "@/components/header";
-import { Providers } from "@/components/providers";
+import { Header } from "@/components/Header";
+import { Providers } from "@/components/Providers";
 import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
