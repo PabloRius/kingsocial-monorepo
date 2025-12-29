@@ -39,12 +39,12 @@ import {
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { redirect, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
-export default function SellPage() {
+function SellPageContent() {
   // Session state
   const { status } = useSession();
   const router = useRouter();
@@ -104,10 +104,14 @@ export default function SellPage() {
   };
 
   const removeImage = (index: number) => {
-    const removed = images[index];
+    const removedImage = images[index];
     setImages((prev) => prev.filter((_, i) => i !== index));
-    if (removed.isNew) {
-      setImageFiles((prev) => prev.filter((_, i) => i !== index));
+    if (removedImage.isNew) {
+      const newFilesIndex = images
+        .slice(0, index)
+        .filter((img) => img.isNew).length;
+
+      setImageFiles((prev) => prev.filter((_, i) => i !== newFilesIndex));
     }
   };
 
@@ -557,5 +561,19 @@ export default function SellPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function SellPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex h-screen items-center justify-center">
+          <Loader2 className="animate-spin h-8 w-8 text-blue-600" />
+        </div>
+      }
+    >
+      <SellPageContent />
+    </Suspense>
   );
 }
