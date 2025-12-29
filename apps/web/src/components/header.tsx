@@ -12,7 +12,7 @@ export const Header = () => {
           status === "unauthenticated"
             ? "left-[50%] translate-x-[-50%]"
             : "left-6"
-        } transition-all flex justify-center hover:scale-110`}
+        } transition-all flex justify-center hover:scale-125`}
       >
         <Link href="/dashboard" className="flex justify-center">
           <div className="relative flex items-center">

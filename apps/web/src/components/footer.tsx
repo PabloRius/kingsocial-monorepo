@@ -22,7 +22,8 @@ export const Footer = () => {
           </Link>
         </div>
         <div className="text-center mt-4 text-xs text-muted-foreground">
-          © {new Date().getFullYear()} KingSocial. All rights reserved.
+          © {new Date().getFullYear()} KingSocial. All rights reserved (Kingston
+          University).
         </div>
       </div>
     </footer>
