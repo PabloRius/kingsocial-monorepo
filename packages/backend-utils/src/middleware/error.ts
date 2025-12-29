@@ -1,4 +1,4 @@
-import { ApiResponse } from "@repo/shared-types";
+import { ApiErrorResponse } from "@repo/shared-types";
 import { NextFunction, Request, Response } from "express";
 
 export const errorHandler = (
@@ -9,10 +9,9 @@ export const errorHandler = (
 ) => {
   console.error("[Server Error]: ", err);
 
-  const response: ApiResponse<null> = {
+  const response: ApiErrorResponse = {
     success: false,
     error: err.message || "Internal Server Error",
-    data: null,
   };
 
   const status = err.status || 500;
