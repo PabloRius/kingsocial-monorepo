@@ -214,7 +214,7 @@ export async function modifyItem(
 }
 
 export async function markItemAsSold(itemId: string) {
-  const url = new URL(`${baseURL}/items/sold/:${itemId}`);
+  const url = new URL(`${baseURL}/items/sold/${itemId}`);
 
   const session = await auth();
 
@@ -228,7 +228,6 @@ export async function markItemAsSold(itemId: string) {
       Authorization: `Bearer ${session.sessionToken}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ itemId }),
   });
 
   if (!response.ok) {
@@ -236,10 +235,10 @@ export async function markItemAsSold(itemId: string) {
     throw new Error("Failed to update item");
   }
 
-  const result: ApiResponse<ProductDTO> = await response.json();
+  const result: ApiResponse<null> = await response.json();
 
   return result;
-} //TODO: Implement in backend
+}
 
 export async function toggleBookmark(itemId: string) {
   const url = new URL(`${baseURL}/items/bookmark/${itemId}`);

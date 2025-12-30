@@ -14,9 +14,17 @@ export async function updateItem(
 }
 
 export async function increaseViews(itemId: string): Promise<boolean> {
-  const result = await prisma.product.update({
+  await prisma.product.update({
     where: { id: itemId },
     data: { views: { increment: 1 } },
+  });
+  return true;
+}
+
+export async function markAsSold(itemId: string): Promise<boolean> {
+  await prisma.product.update({
+    where: { id: itemId },
+    data: { status: "sold", soldAt: new Date() },
   });
   return true;
 }

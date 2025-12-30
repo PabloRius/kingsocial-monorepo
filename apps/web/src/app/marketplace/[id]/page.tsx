@@ -19,6 +19,7 @@ import {
   Bookmark,
   BookmarkCheck,
   Box,
+  CheckCircle,
   ChevronLeft,
   ChevronRight,
   Loader2,
@@ -29,7 +30,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -38,6 +39,7 @@ export default function ItemPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const router = useRouter();
   const [profile, setProfile] = useState<ProfileDTO | undefined | null>(
     undefined
   );
@@ -186,9 +188,37 @@ export default function ItemPage({
         productRefId: item.id,
       });
 
-      redirect(`/inbox?chat=${item.seller.userId}`); // TODO: Implement custom redirect in /inbox
+      router.push(`/inbox?chat=${item.seller.userId}`); // TODO: Implement custom redirect in /inbox
     }
   };
+
+  if (item.status === "sold" && !isOwner) {
+    return (
+      <div className="flex flex-col min-h-screen bg-linear-to-br from-alice-blue-300 via-white to-celestial-blue-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center px-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/30 mb-4">
+              <CheckCircle className="h-8 w-8 text-red-600" />
+            </div>
+            <h1 className="text-2xl font-bold mb-2">Item Sold</h1>
+            <p className="text-gray-600 dark:text-gray-400 mb-6 max-w-md">
+              This listing for{" "}
+              <span className="font-semibold text-gray-900 dark:text-gray-100">
+                {item.name}
+              </span>{" "}
+              has been marked as sold and is no longer available for purchase.
+            </p>
+            <Button
+              asChild
+              className="bg-linear-to-r from-celestial-blue-500 to-picton-blue-500"
+            >
+              <Link href="/marketplace">Explore Other Items</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-linear-to-br from-alice-blue-300 via-white to-celestial-blue-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
@@ -345,21 +375,36 @@ export default function ItemPage({
               <div className="space-y-3">
                 {!showMessageForm ? (
                   <Button
+                    disabled={isOwner && item.status === "sold"}
                     onClick={
                       isOwner
-                        ? () => {
-                            redirect(`edit-item/${item.id}`);
-                          }
+                        ? () => router.push(`edit-item/${item.id}`) // Use router.push instead of redirect for cleaner UX
                         : handleMessageSeller
                     }
-                    className="w-full h-12 bg-linear-to-r from-celestial-blue-500 to-picton-blue-500 hover:from-celestial-blue-600 hover:to-picton-blue-600 text-white rounded-xl font-medium"
+                    className={`w-full h-12 rounded-xl font-medium transition-all ${
+                      isOwner && item.status === "sold"
+                        ? "bg-red-500 hover:bg-red-500 cursor-not-allowed opacity-100 text-white"
+                        : "bg-linear-to-r from-celestial-blue-500 to-picton-blue-500 hover:from-celestial-blue-600 hover:to-picton-blue-600 text-white"
+                    }`}
                   >
                     {isOwner ? (
-                      <Box className="mr-2 h-5 w-5" />
+                      item.status === "sold" ? (
+                        <>
+                          <CheckCircle className="mr-2 h-5 w-5" />
+                          Item Already Sold
+                        </>
+                      ) : (
+                        <>
+                          <Box className="mr-2 h-5 w-5" />
+                          Edit Item
+                        </>
+                      )
                     ) : (
-                      <MessageCircle className="mr-2 h-5 w-5" />
+                      <>
+                        <MessageCircle className="mr-2 h-5 w-5" />
+                        Message Seller
+                      </>
                     )}
-                    {isOwner ? "Edit Item" : "Message Seller"}
                   </Button>
                 ) : (
                   <form onSubmit={handleSendMessage} className="space-y-3">

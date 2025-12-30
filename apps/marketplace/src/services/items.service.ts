@@ -93,6 +93,28 @@ export async function increaseItemViewsByOne(userId: string, itemId: string) {
   return result;
 }
 
+export async function markItemAsSold(userId: string, itemId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { sellerProfile: { select: { id: true } } },
+  });
+
+  const item = await prisma.product.findUnique({
+    where: { id: itemId },
+    select: { seller: { select: { userId: true } } },
+  });
+
+  if (!user || !user.sellerProfile || item?.seller?.userId !== userId) {
+    throw new Errors.APIError(
+      "Only the seller can modify an item's status",
+      403
+    );
+  }
+
+  const result = await ItemStore.markAsSold(itemId);
+  return result;
+}
+
 export async function deleteItemById(userId: string, itemId: string) {
   console.log(itemId);
   const item = await prisma.product.findUnique({

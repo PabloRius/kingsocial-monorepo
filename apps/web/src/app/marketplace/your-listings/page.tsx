@@ -101,14 +101,16 @@ export default function YourItemsPage() {
       const response = await markItemAsSold(itemId);
 
       if (response) toast.success("Congrats on the transaction!");
+      fetchItems();
     } catch (error) {
       console.error(error);
+      toast.error("Error updating item");
     }
-
-    toast.error("Error updating item");
   };
 
-  const handleResell = async () => {};
+  const handleResell = async (itemId: string) => {
+    redirect(`/marketplace/sell?resellId=${itemId}`);
+  };
 
   return (
     <main className="flex flex-col flex-1 py-6 px-4 sm:px-6">
