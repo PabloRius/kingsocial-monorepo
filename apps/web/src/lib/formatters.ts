@@ -17,3 +17,29 @@ export function formatDate(date: Date) {
     year: "numeric",
   });
 }
+
+export function formatChatTimestamp(date: Date): string {
+  const now = new Date();
+  const d = new Date(date);
+
+  // Midnight today
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  // Midnight yesterday
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  if (d >= today) {
+    // Today -> show time
+    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  } else if (d >= yesterday) {
+    // Yesterday
+    return "yesterday";
+  } else {
+    // Older
+    return d.toLocaleDateString([], {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  }
+}

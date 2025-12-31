@@ -47,7 +47,7 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 export default function EditItemPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ itemId: string }>;
 }) {
   const router = useRouter();
   const [item, setItem] = useState<ProductDTO | undefined | null>(undefined);
@@ -64,9 +64,9 @@ export default function EditItemPage({
   useEffect(() => {
     const fetchItem = async () => {
       try {
-        const { id } = await params;
-        if (!id) return;
-        const result = await getItemById(id);
+        const { itemId } = await params;
+        if (!itemId) return;
+        const result = await getItemById(itemId);
         setItem(result.data);
         setFormData({
           name: result.data.name,

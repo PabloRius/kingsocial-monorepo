@@ -161,14 +161,25 @@ export const ItemCard = ({
               </div>
 
               <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                  <Calendar className="h-3.5 w-3.5" />
-                  <span>{formatDate(item.createdAt)}</span>
+                <div className="flex flex-col gap-1">
+                  <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                    <Calendar className="h-3.5 w-3.5" />
+                    <span>Posted {formatDate(item.createdAt)}</span>
+                  </div>
+
+                  {/* Show Sold Date only in Dashboard mode if it exists */}
+                  {isDashboard && item.status === "sold" && item.soldAt && (
+                    <div className="flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
+                      <CheckCircle className="h-3.5 w-3.5" />
+                      <span>Sold {formatDate(item.soldAt)}</span>
+                    </div>
+                  )}
                 </div>
+
                 {item.status === "sold" && (
                   <Badge
                     variant="secondary"
-                    className="text-[10px] uppercase tracking-wider"
+                    className="text-[10px] uppercase tracking-wider bg-emerald-50 text-emerald-700 border-emerald-200"
                   >
                     Sold
                   </Badge>

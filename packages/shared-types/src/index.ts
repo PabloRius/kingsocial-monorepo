@@ -13,3 +13,5 @@ export interface ApiErrorResponse {
 export * from "./profile";
 
 export * from "./marketplace";
+
+export * from "./chat";

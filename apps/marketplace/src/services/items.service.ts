@@ -115,6 +115,32 @@ export async function markItemAsSold(userId: string, itemId: string) {
   return result;
 }
 
+export async function toggleItemBookmark(userId: string, itemId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { bookmarkedProducts: true },
+  });
+
+  const item = await prisma.product.findUnique({
+    where: { id: itemId },
+    select: { seller: { select: { userId: true } } },
+  });
+
+  if (!user || !user.bookmarkedProducts || !item) {
+    throw new Errors.APIError("Invalid params", 400);
+  }
+
+  if (item.seller?.userId === userId) {
+    throw new Errors.APIError("You cannot bookmark your own items", 400);
+  }
+
+  if (user.bookmarkedProducts.includes(itemId)) {
+    return await ItemStore.unBookmarkItem(userId, itemId);
+  }
+
+  return await ItemStore.bookmarkItem(userId, itemId);
+}
+
 export async function deleteItemById(userId: string, itemId: string) {
   console.log(itemId);
   const item = await prisma.product.findUnique({

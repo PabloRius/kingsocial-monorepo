@@ -37,7 +37,7 @@ import { toast } from "sonner";
 export default function ItemPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ itemId: string }>;
 }) {
   const router = useRouter();
   const [profile, setProfile] = useState<ProfileDTO | undefined | null>(
@@ -62,8 +62,8 @@ export default function ItemPage({
   useEffect(() => {
     const fetchItem = async () => {
       try {
-        const { id } = await params;
-        const result = await getItemById(id);
+        const { itemId } = await params;
+        const result = await getItemById(itemId);
         setItem(result.data || null);
       } catch (error) {
         console.error(error);
@@ -178,17 +178,23 @@ export default function ItemPage({
     setShowMessageForm(true);
   };
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!item.seller || !profile) return;
-    if (message.trim()) {
-      sendMessageWithFallback({
-        content: message,
+    if (!item.seller || !message.trim()) return;
+
+    try {
+      const result = await sendMessageWithFallback({
         receiverId: item.seller.userId,
+        content: message,
         productRefId: item.id,
       });
 
-      router.push(`/inbox?chat=${item.seller.userId}`); // TODO: Implement custom redirect in /inbox
+      if (result.success) {
+        router.push(`/inbox/${result.data.chatId}`);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to start conversation");
     }
   };
 

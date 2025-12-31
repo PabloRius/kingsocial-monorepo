@@ -22,13 +22,14 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function SelectPlanPage() {
   const [profile, setProfile] = useState<ProfileDTO | undefined | null>(
     undefined
   );
+  const router = useRouter();
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -46,7 +47,7 @@ export default function SelectPlanPage() {
   const handleActivatePlan = async (id: SellerPlan) => {
     try {
       const result = await activatePlan(id);
-      if (result.success) redirect("/marketplace");
+      if (result.success) router.push("/marketplace/your-listings");
     } catch (error) {
       console.error(error);
     }

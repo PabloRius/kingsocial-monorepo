@@ -101,6 +101,17 @@ router.put(
   })
 );
 
+router.put(
+  "/bookmark/:itemId",
+  Middleware.authenticate,
+  Utils.asyncHandler(async (req: Request, res: Response) => {
+    const userId = (req as any).user.id;
+    const { itemId } = req.params;
+    const result = await ItemService.toggleItemBookmark(userId, itemId);
+    res.json({ success: result, data: null });
+  })
+);
+
 router.delete(
   "/:itemId",
   Middleware.authenticate,

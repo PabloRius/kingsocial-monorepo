@@ -243,16 +243,28 @@ export async function markItemAsSold(itemId: string) {
 export async function toggleBookmark(itemId: string) {
   const url = new URL(`${baseURL}/items/bookmark/${itemId}`);
 
-  const response = await fetch(url.toString());
+  const session = await auth();
+
+  if (!session?.sessionToken) {
+    throw new Error("Unauthorised: No session token found");
+  }
+
+  const response = await fetch(url.toString(), {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${session.sessionToken}`,
+      "Content-Type": "application/json",
+    },
+  });
 
   if (!response.ok) {
     throw new Error("Failed to fetch bookmarking service");
   }
 
-  const result: ApiResponse<MarketplaceResponse> = await response.json();
+  const result: ApiResponse<null> = await response.json();
 
   return result;
-} //TODO: Implement in backend
+}
 
 export async function increaseViews(itemId: string) {
   const url = new URL(`${baseURL}/items/increase_views/${itemId}`);
@@ -319,9 +331,22 @@ export async function activatePlan(id: string) {
 
   url.searchParams.append("id", id);
 
-  const response = await fetch(url.toString(), { method: "POST" });
+  const session = await auth();
+
+  if (!session?.sessionToken) {
+    throw new Error("Unauthorised: No session token found");
+  }
+
+  const response = await fetch(url.toString(), {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${session.sessionToken}`,
+      "Content-Type": "application/json",
+    },
+  });
 
   if (!response.ok) {
+    console.error("Failed to select a plan: ", response);
     throw new Error("Failed to select a plan");
   }
 
