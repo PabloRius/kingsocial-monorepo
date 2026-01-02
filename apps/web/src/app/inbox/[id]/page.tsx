@@ -109,19 +109,22 @@ export default function InboxPage() {
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div className="relative">
-                <Avatar>
-                  <AvatarImage
-                    src={
-                      // chat.avatar ||
-                      otherParticipant?.user.image || "/placeholder.png"
-                    }
-                    alt={
-                      // chat.avatar
-                      //   ? "Chat Avatar"
-                      otherParticipant?.user.name
-                    }
-                  />
-                </Avatar>
+                <Link
+                  href={`/profile/${otherParticipant?.userId}`}
+                  className="block group relative"
+                >
+                  <Avatar className="transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:ring-2 group-hover:ring-blue-500 group-hover:ring-offset-2 ring-offset-white shadow-sm">
+                    <AvatarImage
+                      src={otherParticipant?.user.image || "/placeholder.png"}
+                      alt={otherParticipant?.user.name}
+                      className="object-cover"
+                    />
+                  </Avatar>
+
+                  <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 scale-0 group-hover:scale-100 transition-all duration-200 bg-gray-900 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap z-50 pointer-events-none">
+                    View Profile
+                  </span>
+                </Link>
                 {/* {selectedChatData?.online && (
                     <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
                   )} */}

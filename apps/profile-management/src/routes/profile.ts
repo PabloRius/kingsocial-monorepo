@@ -23,7 +23,7 @@ router.get(
   Utils.asyncHandler(async (req: Request, res: Response) => {
     const { userId } = req.params;
 
-    const result = await ProfileService.getOwnProfile(userId);
+    const result = await ProfileService.getPublicProfile(userId);
 
     res.json({ success: true, data: result });
   })

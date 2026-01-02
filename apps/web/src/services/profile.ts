@@ -35,6 +35,31 @@ export async function getOwnProfile() {
   return result;
 }
 
+export async function getProfileById(userId: string) {
+  const session = await auth();
+
+  if (!session?.sessionToken) {
+    throw new Error("Unauthorised: No session token found");
+  }
+
+  const response = await fetch(`${baseURL}/profile/${userId}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${session.sessionToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    console.error("Failed to fetch profile data", response);
+    throw new Error("Failed to fetch profile data");
+  }
+
+  const result: ApiResponse<ProfileDTO> = await response.json();
+
+  return result;
+}
+
 export async function updateProfile(
   data: ProfileUpdatePayload,
   imageFile?: File,

@@ -359,7 +359,7 @@ export default function MarketplacePage() {
                       key={item.id}
                       mode="marketplace"
                       item={item}
-                      profile={profile}
+                      isLoggedIn={!!profile}
                       bookmarkedIds={bookmarkedIds}
                       onBookmark={handleBookmarkProduct}
                     />

@@ -1,5 +1,6 @@
+import { useProfile } from "@/context/ProfileContext";
 import { formatDate } from "@/lib/formatters";
-import { ProductDTO, ProfileDTO } from "@repo/shared-types";
+import { ProductDTO } from "@repo/shared-types";
 import {
   Bookmark,
   Calendar,
@@ -24,29 +25,46 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 
-interface ItemCardProps {
+interface ProfileItemCardProps {
   item: ProductDTO;
-  mode: "marketplace" | "dashboard";
-  profile?: ProfileDTO | null;
-  bookmarkedIds?: string[];
-  onBookmark?: (id: string) => void;
-  onDelete?: (item: ProductDTO) => void;
-  onMarkSold?: (id: string) => void;
-  onReSell?: (id: string) => void;
+  mode: "profile";
+  bookmarkedIds: string[];
+  onBookmark: (id: string) => void;
 }
 
-export const ItemCard = ({
-  item,
-  mode,
-  profile,
-  bookmarkedIds = [],
-  onBookmark,
-  onDelete,
-  onMarkSold,
-  onReSell,
-}: ItemCardProps) => {
+interface MarketplaceItemCardProps {
+  item: ProductDTO;
+  mode: "marketplace";
+  isLoggedIn: boolean;
+  bookmarkedIds: string[];
+  onBookmark: (id: string) => void;
+}
+
+interface DashboardItemCardProps {
+  item: ProductDTO;
+  mode: "dashboard";
+  onDelete: (item: ProductDTO) => void;
+  onMarkSold: (id: string) => void;
+  onReSell: (id: string) => void;
+}
+
+type ItemCardProps =
+  | ProfileItemCardProps
+  | MarketplaceItemCardProps
+  | DashboardItemCardProps;
+
+export const ItemCard = (props: ItemCardProps) => {
+  const { mode, item } = props;
+  const { profile } = useProfile();
+
   const isDashboard = mode === "dashboard";
   const isMarketplace = mode === "marketplace";
+  const isProfile = mode === "profile";
+
+  const isOwnProfile = isProfile && profile?.id === item.seller?.userId;
+
+  const canBookmark =
+    (isMarketplace && props.isLoggedIn) || (isProfile && !isOwnProfile);
 
   return (
     <Link href={`/marketplace/${item.id}`}>
@@ -62,7 +80,7 @@ export const ItemCard = ({
             />
 
             {/* OVERLAYS BASED ON MODE */}
-            {isMarketplace && !!profile && (
+            {canBookmark && (
               <Button
                 size="icon"
                 variant="ghost"
@@ -70,12 +88,12 @@ export const ItemCard = ({
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
-                  onBookmark?.(item.id);
+                  props.onBookmark(item.id);
                 }}
               >
                 <Bookmark
                   className={`h-4 w-4 text-blue-600 ${
-                    bookmarkedIds.includes(item.id) ? "fill-blue-600" : ""
+                    props.bookmarkedIds.includes(item.id) ? "fill-blue-600" : ""
                   }`}
                 />
               </Button>
@@ -117,16 +135,18 @@ export const ItemCard = ({
                       >
                         <Edit className="mr-2 h-4 w-4" /> Edit
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onMarkSold?.(item.id)}>
+                      <DropdownMenuItem
+                        onClick={() => props.onMarkSold(item.id)}
+                      >
                         <CheckCircle className="mr-2 h-4 w-4" /> Mark as Sold
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onReSell?.(item.id)}>
+                      <DropdownMenuItem onClick={() => props.onReSell(item.id)}>
                         <RotateCcw className="mr-2 h-4 w-4" /> Re-Sell
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem
                         className="text-red-600"
-                        onClick={() => onDelete?.(item)}
+                        onClick={() => props.onDelete(item)}
                       >
                         <Trash2 className="mr-2 h-4 w-4" /> Delete
                       </DropdownMenuItem>

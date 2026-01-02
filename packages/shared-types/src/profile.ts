@@ -1,4 +1,5 @@
 import z from "zod";
+import { ProductDTOSchema } from "./marketplace";
 
 export const socialLinkSchema = z.object({
   platform: z.string().min(1).max(50),
@@ -21,17 +22,7 @@ export const ProfileDTOSchema = z.object({
     .object({
       id: z.string(),
       plan: z.string(),
-      products: z.array(
-        z.object({
-          id: z.string(),
-          name: z.string(),
-          price: z.number(),
-          photos: z.array(z.string()),
-          category: z.string(),
-          status: z.string(),
-          createdAt: z.date().or(z.string()),
-        })
-      ),
+      products: z.array(ProductDTOSchema),
     })
     .nullable(),
 });

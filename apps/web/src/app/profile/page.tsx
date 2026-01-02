@@ -489,7 +489,7 @@ export default function OwnProfilePage() {
                           Item
                           {profile.sellerProfile.products.filter(
                             (prod) => prod.status === "sold"
-                          ).length > 1
+                          ).length !== 1
                             ? "s"
                             : ""}{" "}
                           Sold
@@ -517,7 +517,10 @@ export default function OwnProfilePage() {
                           }
                         </div>
                         <div className="text-xs text-gray-600 dark:text-gray-400">
-                          Active Listings
+                          Active Listing
+                          {profile.sellerProfile.products.filter(
+                            (prod) => prod.status !== "sold"
+                          ).length !== 1 && "s"}
                         </div>
                       </div>
                     </div>
