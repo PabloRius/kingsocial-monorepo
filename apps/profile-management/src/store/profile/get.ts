@@ -1,14 +1,13 @@
 import { Prisma, prisma } from "@repo/database";
 import { ProfileDTO } from "@repo/shared-types";
 
-const profileSelect = {
+export const profileSelect = {
   id: true,
   name: true,
   email: true,
   image: true,
   biography: true,
-  instagram: true,
-  linkedin: true,
+  socialLinks: true,
   coverImage: true,
   createdAt: true,
   bookmarkedProducts: true,
@@ -24,6 +23,7 @@ const profileSelect = {
           price: true,
           photos: true,
           category: true,
+          status: true,
           createdAt: true,
         },
       },

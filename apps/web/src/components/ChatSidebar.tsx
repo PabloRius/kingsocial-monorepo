@@ -2,31 +2,16 @@
 
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useChat } from "@/context/ChatContext";
+import { useProfile } from "@/context/ProfileContext";
 import { formatChatTimestamp } from "@/lib/formatters";
-import { getOwnProfile } from "@/services/profile";
-import { ProfileDTO } from "@repo/shared-types";
 import { Loader2, Search } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { Input } from "./ui/input";
 
 export function ChatSidebar() {
-  const [profile, setProfile] = useState<ProfileDTO | undefined | null>(
-    undefined
-  );
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const result = await getOwnProfile();
-        setProfile(result.data || null);
-      } catch (error) {
-        console.error(error);
-        setProfile(null);
-      }
-    };
-    fetchProfile();
-  }, []);
+  const { profile } = useProfile();
   const { chats, isSidebarOpen, setIsSidebarOpen } = useChat();
   const { id: activeChatId } = useParams();
   const router = useRouter();

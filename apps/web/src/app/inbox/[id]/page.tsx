@@ -5,9 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useChat } from "@/context/ChatContext";
+import { useProfile } from "@/context/ProfileContext";
 import { sendMessage } from "@/services/chat";
-import { getOwnProfile } from "@/services/profile";
-import { ProfileDTO } from "@repo/shared-types";
 import { format, isToday, isYesterday } from "date-fns";
 import {
   ArrowLeft,
@@ -27,25 +26,7 @@ export default function InboxPage() {
   const params = useParams();
   const chatId = params.id as string;
 
-  const [profile, setProfile] = useState<ProfileDTO | undefined | null>(
-    undefined
-  );
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const result = await getOwnProfile();
-
-        setProfile(result.data || null);
-      } catch (error) {
-        console.error(error);
-
-        setProfile(null);
-      }
-    };
-
-    fetchProfile();
-  }, []);
+  const { profile } = useProfile();
   const { chats, socket, setIsSidebarOpen } = useChat();
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);

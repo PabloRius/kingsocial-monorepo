@@ -1,4 +1,5 @@
 import { Errors } from "@repo/backend-utils";
+import { ProfileUpdatePayload } from "@repo/shared-types";
 import * as ProfileStore from "../store/profile";
 
 export async function getPublicProfile(userId: string) {
@@ -11,4 +12,11 @@ export async function getPublicProfile(userId: string) {
 
 export async function getOwnProfile(authenticatedUserId: string) {
   return await getPublicProfile(authenticatedUserId);
+}
+
+export async function updateProfile(
+  userId: string,
+  data: ProfileUpdatePayload
+) {
+  return await ProfileStore.updateProfile(userId, data);
 }

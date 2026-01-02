@@ -1,4 +1,5 @@
 import { Middleware, Utils } from "@repo/backend-utils";
+import { ProfileUpdateSchema } from "@repo/shared-types";
 import { Request, Response, Router } from "express";
 import * as ProfileService from "../services/profile.service";
 
@@ -23,6 +24,19 @@ router.get(
     const { userId } = req.params;
 
     const result = await ProfileService.getOwnProfile(userId);
+
+    res.json({ success: true, data: result });
+  })
+);
+
+router.put(
+  "/me",
+  Middleware.authenticate,
+  Middleware.validate(ProfileUpdateSchema),
+  Utils.asyncHandler(async (req: Request, res: Response) => {
+    const userId = (req as any).user.id;
+
+    const result = await ProfileService.updateProfile(userId, req.body);
 
     res.json({ success: true, data: result });
   })

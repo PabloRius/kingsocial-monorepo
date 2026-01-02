@@ -8,31 +8,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { getOwnProfile } from "@/services/profile";
-import { ProfileDTO } from "@repo/shared-types";
+import { useProfile } from "@/context/ProfileContext";
 import { Loader2, LogOut, User } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { UserAvatar } from "../UserAvatar";
 
 export function UserDropdown() {
-  const [profile, setProfile] = useState<ProfileDTO | undefined | null>(
-    undefined
-  );
-
-  useEffect(() => {
-    const fetchOwnProfile = async () => {
-      try {
-        const result = await getOwnProfile();
-        setProfile(result.data || null);
-      } catch (error) {
-        console.log(error);
-        setProfile(null);
-      }
-    };
-    fetchOwnProfile();
-  }, []);
+  const { profile } = useProfile();
 
   if (profile === null) return;
 

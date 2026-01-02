@@ -7,14 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserAvatar } from "@/components/UserAvatar";
+import { useProfile } from "@/context/ProfileContext";
 import { sendMessageWithFallback } from "@/services/chat";
 import {
   getItemById,
   increaseViews,
   toggleBookmark,
 } from "@/services/marketplace";
-import { getOwnProfile } from "@/services/profile";
-import { ProductDTO, ProfileDTO } from "@repo/shared-types";
+import { ProductDTO } from "@repo/shared-types";
 import {
   Bookmark,
   BookmarkCheck,
@@ -40,23 +40,7 @@ export default function ItemPage({
   params: Promise<{ itemId: string }>;
 }) {
   const router = useRouter();
-  const [profile, setProfile] = useState<ProfileDTO | undefined | null>(
-    undefined
-  );
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const result = await getOwnProfile();
-        setProfile(result.data);
-      } catch {
-        toast.info(
-          "Not logged in, create an account to unlock all capabilities"
-        );
-        setProfile(null);
-      }
-    };
-    fetchProfile();
-  }, []);
+  const { profile } = useProfile();
 
   const [item, setItem] = useState<ProductDTO | undefined | null>(undefined);
   useEffect(() => {

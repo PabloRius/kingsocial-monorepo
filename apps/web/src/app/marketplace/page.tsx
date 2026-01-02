@@ -15,15 +15,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useProfile } from "@/context/ProfileContext";
 import { useDebounce } from "@/hooks/useDebounce";
 import { getMarketplaceStore, toggleBookmark } from "@/services/marketplace";
-import { getOwnProfile } from "@/services/profile";
 import {
   CATEGORIES_FILTER,
   CategoryFilter,
   ConditionFilter,
   ProductDTO,
-  ProfileDTO,
 } from "@repo/shared-types";
 import {
   Loader2,
@@ -34,32 +33,13 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { toast } from "sonner";
 
 export default function MarketplacePage() {
   // Tabs
   const [activeTab, setActiveTab] = useState<string>("featured");
 
   // Profile state
-  const [profile, setProfile] = useState<ProfileDTO | undefined | null>(
-    undefined
-  );
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const result = await getOwnProfile();
-        setProfile(result.data || null);
-      } catch {
-        toast.info(
-          "Not logged in, create an account to browse further into the marketplace"
-        );
-        setProfile(null);
-      }
-    };
-    fetchProfile();
-  }, []);
-
+  const { profile } = useProfile();
   // Filters
   const [searchQuery, setSearchQuery] = useState<string>("");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
