@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { UnauthorizedPage } from "@/components/UnauthorisedCard";
 import { UserAvatar } from "@/components/UserAvatar";
 import { useProfile } from "@/context/ProfileContext";
 import { deleteProfile, updateProfile } from "@/services/profile";
@@ -91,7 +92,7 @@ export default function OwnProfilePage() {
     );
   }
   if (!profile) {
-    return; //TODO: Add error message and return button
+    return <UnauthorizedPage />;
   }
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

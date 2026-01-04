@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { UnauthorizedPage } from "@/components/UnauthorisedCard";
 import { createItem, getItemById } from "@/services/marketplace";
 import {
   CATEGORIES_CORE,
@@ -38,7 +39,7 @@ import {
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import { redirect, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -223,7 +224,7 @@ function SellPageContent() {
 
   // Session check
   if (status === "unauthenticated") {
-    redirect("/");
+    return <UnauthorizedPage />;
   }
 
   return (

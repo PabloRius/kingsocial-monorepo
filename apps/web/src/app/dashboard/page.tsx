@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function DashboardPage() {
@@ -72,7 +71,7 @@ export default function DashboardPage() {
   }
 
   if (status === "unauthenticated") {
-    redirect("/");
+    return null;
   }
 
   return (

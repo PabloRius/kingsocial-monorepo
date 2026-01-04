@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { UnauthorizedPage } from "@/components/UnauthorisedCard";
 import {
   deleteItemById,
   getOwnMarketplaceStore,
@@ -58,6 +59,8 @@ export default function YourItemsPage() {
 
   const [itemToDelete, setItemToDelete] = useState<ProductDTO | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
+  if (status === "unauthenticated") return <UnauthorizedPage />;
 
   if (items === null) {
     redirect("/");
@@ -244,6 +247,7 @@ export default function YourItemsPage() {
                     item={item}
                     onDelete={handleDelete}
                     onReSell={handleResell}
+                    onMarkSold={handleMarkSold}
                   />
                 ))}
               </div>
