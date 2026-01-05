@@ -15,3 +15,5 @@ export * from "./profile";
 export * from "./marketplace";
 
 export * from "./chat";
+
+export * from "./communities";

@@ -31,6 +31,15 @@ io.on("connection", (socket) => {
     console.log(`User ${userId} joined room ${chatId}`);
   });
 
+  socket.on("join_community", (communityId: string) => {
+    socket.join(`community_${communityId}`);
+    console.log(`User ${userId} joined community: ${communityId}`);
+  });
+
+  socket.on("leave_community", (communityId: string) => {
+    socket.leave(`community_${communityId}`);
+  });
+
   socket.on("disconnect", () => {
     console.log("User disconnected");
   });

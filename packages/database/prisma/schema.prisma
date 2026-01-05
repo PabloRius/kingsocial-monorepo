@@ -219,6 +219,7 @@ model Community {
   events        Event[]
 
   createdAt     DateTime                @default(now())
+  creatorId     String
   
   // AI fields
   embedding       Json?

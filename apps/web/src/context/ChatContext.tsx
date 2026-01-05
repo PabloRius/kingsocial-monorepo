@@ -2,6 +2,7 @@
 
 import { getChats } from "@/services/chat";
 import { ChatDTO, MessageDTO } from "@repo/shared-types";
+import { Users } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useParams } from "next/navigation";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
@@ -30,6 +31,12 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
   const [socket, setSocket] = useState<Socket | null>(null);
   const socketRef = useRef<Socket | null>(null);
+
+  const currentCommunityRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    currentCommunityRef.current = (params?.communityId as string) || null;
+  }, [params?.communityId]);
 
   useEffect(() => {
     if (!session?.sessionToken || socketRef.current) return;
@@ -102,6 +109,31 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
           });
       });
     });
+
+    s.on(
+      "community_notification",
+      (data: {
+        communityName: string;
+        communityId: string;
+        content: string;
+        senderName: string;
+      }) => {
+        const isLookingAtCommunity =
+          currentCommunityRef.current === data.communityId;
+
+        if (!isLookingAtCommunity) {
+          toast.info(`New in ${data.communityName}`, {
+            description: `${data.senderName}: ${data.content}`,
+            icon: <Users className="h-4 w-4 text-purple-500" />,
+            action: {
+              label: "Open",
+              onClick: () =>
+                (window.location.href = `/communities/${data.communityId}`),
+            },
+          });
+        }
+      }
+    );
 
     return () => {
       clearTimeout(timeoutId);

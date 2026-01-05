@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "baseUrl": ".",
+    "paths": {
+      "@repo/shared-types": ["../../packages/shared-types/src/index.ts"],
+      "@repo/database": ["../../packages/database/src/index.ts"],
+      "@repo/backend-utils": ["../../packages/backend-utils/src/index.ts"]
+    }
+  },
+  "include": ["src"]
+}

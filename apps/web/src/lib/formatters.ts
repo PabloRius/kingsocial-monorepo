@@ -18,6 +18,15 @@ export function formatDate(date: Date) {
   });
 }
 
+export function formatTime(time: string) {
+  // Format a string timestamp in a card-friendly format
+  const [hours, minutes] = time.split(":");
+  const hour = Number.parseInt(hours);
+  const ampm = hour >= 12 ? "PM" : "AM";
+  const displayHour = hour % 12 || 12;
+  return `${displayHour}:${minutes} ${ampm}`;
+}
+
 export function formatChatTimestamp(date: Date): string {
   const now = new Date();
   const d = new Date(date);
@@ -42,4 +51,16 @@ export function formatChatTimestamp(date: Date): string {
       year: "numeric",
     });
   }
+}
+
+export function getColorFromId(id: string): string {
+  // Generates a unique color for each id given (for community chats)
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  const hue = Math.abs(hash) % 360;
+
+  return `hsl(${hue}, 70%, 50%)`;
 }
