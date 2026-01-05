@@ -6,16 +6,21 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useChat } from "@/context/ChatContext";
 import { useProfile } from "@/context/ProfileContext";
+import { formatDate, formatTime } from "@/lib/formatters";
 import { sendMessage } from "@/services/chat";
 import { format, isToday, isYesterday } from "date-fns";
 import {
   ArrowLeft,
+  Calendar,
   ExternalLink,
+  Globe,
   Loader2,
+  MapPin,
   MoreVertical,
   Send,
   Smile,
 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -26,6 +31,7 @@ export default function InboxPage() {
   const params = useParams();
   const chatId = params.id as string;
 
+  const { status } = useSession();
   const { profile } = useProfile();
   const { chats, socket, setIsSidebarOpen } = useChat();
   const [message, setMessage] = useState("");
@@ -51,8 +57,6 @@ export default function InboxPage() {
     scrollToBottom();
   }, [selectedChatData?.messages]);
 
-  if (!profile) return;
-
   const handleSendMessage = async () => {
     if (!message.trim() || isSubmitting) return;
 
@@ -74,13 +78,15 @@ export default function InboxPage() {
     }
   };
 
-  if (!selectedChatData && chats !== undefined) {
+  if ((!selectedChatData && chats !== undefined) || status === "loading") {
     return (
       <div className="flex-1 flex items-center justify-center">
         Chat not found
       </div>
     );
   }
+
+  if (!profile || status === "unauthenticated") return;
 
   if (chats === undefined || selectedChatData === undefined)
     return (
@@ -227,65 +233,61 @@ export default function InboxPage() {
                         )}
 
                         {/* Event Reference Card */}
-                        {/* {msg.eventRef && (
-                            <Link
-                              href={`/community/${msg.eventRef.community.id}/events/${msg.eventRef.id}`}
-                              className="block mb-2 bg-white border border-blue-200 rounded-lg p-3 hover:shadow-md transition-all group"
-                            >
-                              <div className="space-y-2">
-                                <div className="flex items-start justify-between gap-2">
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors mb-1">
-                                      {msg.eventRef.title}
-                                    </p>
-                                    <p className="text-xs text-gray-600">
-                                      from{" "}
-                                      <span className="font-medium">
-                                        {msg.eventRef.community.name}
-                                      </span>
-                                    </p>
-                                  </div>
-                                  <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-blue-600 shrink-0" />
-                                </div>
-
-                                <div className="flex items-center gap-3 text-xs text-gray-600">
-                                  <div className="flex items-center gap-1">
-                                    <Calendar className="w-3 h-3 text-blue-600" />
-                                    <span>
-                                      {formatEventDate(msg.eventRef.date)}
+                        {msg.eventRef && (
+                          <Link
+                            href={`/events/${msg.eventRef.id}`}
+                            className="block mb-2 bg-white border border-blue-200 rounded-lg p-3 hover:shadow-md transition-all group"
+                          >
+                            <div className="space-y-2">
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-semibold text-gray-900 truncate group-hover:text-blue-600 transition-colors mb-1">
+                                    {msg.eventRef.title}
+                                  </p>
+                                  <p className="text-xs text-gray-600">
+                                    from{" "}
+                                    <span className="font-medium">
+                                      {msg.eventRef.community.name}
                                     </span>
-                                  </div>
-                                  {!msg.eventRef.all_day &&
-                                    msg.eventRef.start_time && (
-                                      <div className="flex items-center gap-1">
-                                        <span>•</span>
-                                        <span>
-                                          {formatEventTime(
-                                            msg.eventRef.start_time
-                                          )}
-                                        </span>
-                                      </div>
-                                    )}
+                                  </p>
                                 </div>
-
-                                <div className="flex items-center gap-1 text-xs text-gray-600">
-                                  {msg.eventRef.location_format === "online" ? (
-                                    <>
-                                      <Globe className="w-3 h-3 text-green-600" />
-                                      <span>Online Event</span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <MapPin className="w-3 h-3 text-blue-600" />
-                                      <span className="truncate">
-                                        {msg.eventRef.location}
-                                      </span>
-                                    </>
-                                  )}
-                                </div>
+                                <ExternalLink className="h-4 w-4 text-gray-400 group-hover:text-blue-600 shrink-0" />
                               </div>
-                            </Link>
-                          )} */}
+
+                              <div className="flex items-center gap-3 text-xs text-gray-600">
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="w-3 h-3 text-blue-600" />
+                                  <span>{formatDate(msg.eventRef.date)}</span>
+                                </div>
+                                {!msg.eventRef.all_day &&
+                                  msg.eventRef.start_time && (
+                                    <div className="flex items-center gap-1">
+                                      <span>•</span>
+                                      <span>
+                                        {formatTime(msg.eventRef.start_time)}
+                                      </span>
+                                    </div>
+                                  )}
+                              </div>
+
+                              <div className="flex items-center gap-1 text-xs text-gray-600">
+                                {msg.eventRef.location_format === "online" ? (
+                                  <>
+                                    <Globe className="w-3 h-3 text-green-600" />
+                                    <span>Online Event</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <MapPin className="w-3 h-3 text-blue-600" />
+                                    <span className="truncate">
+                                      {msg.eventRef.location}
+                                    </span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </Link>
+                        )}
 
                         {/* Message Bubble */}
                         <p className="text-sm">{msg.content}</p>

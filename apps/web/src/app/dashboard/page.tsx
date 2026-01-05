@@ -1,17 +1,21 @@
 "use client";
 
+import {
+  EventCalendarCard,
+  EventCalendarSkeleton,
+} from "@/components/EventCalendarCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { useProfile } from "@/context/ProfileContext"; // Use your new context!
 import { formatCount } from "@/lib/formatters";
 import { getAllCommunities } from "@/services/communities";
+import { getAllEvents } from "@/services/event";
 import { getMarketplaceStore } from "@/services/marketplace";
+import { EventDTO } from "@repo/shared-types";
 import {
   ArrowRight,
-  Calendar,
   Loader2,
-  MapPin,
   ShoppingBag,
   Sparkles,
   TrendingUp,
@@ -26,17 +30,20 @@ export default function DashboardPage() {
   const { profile } = useProfile();
   const [marketplaceCount, setMarketplaceCount] = useState<number | null>(null);
   const [communitiesCount, setCommunitiesCount] = useState<number | null>(null);
+  const [events, setEvents] = useState<EventDTO[] | undefined>(undefined);
 
   useEffect(() => {
     if (status !== "authenticated") return;
     const fetchData = async () => {
       try {
-        const [mkt, comm] = await Promise.all([
+        const [mkt, comm, events] = await Promise.all([
           getMarketplaceStore(),
           getAllCommunities(),
+          getAllEvents(),
         ]);
         setMarketplaceCount(mkt?.data?.totalCount || 0);
         setCommunitiesCount(comm.data.length);
+        setEvents(events.data || []);
       } catch (error) {
         console.error(error);
       }
@@ -182,41 +189,13 @@ export default function DashboardPage() {
         </div>
 
         {/* 3. RIGHT SIDEBAR - CONTEXTUAL INFO */}
-        <aside className="lg:col-span-4 space-y-6">
-          <Card className="border-none shadow-lg rounded-3xl overflow-hidden">
-            <CardHeader className="bg-slate-50 border-b border-gray-100">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-blue-600" />
-                Schedule
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="p-6">
-              <div className="space-y-6">
-                {/* Simplified Event Item */}
-                {[1, 2].map((i) => (
-                  <div key={i} className="flex gap-4 group cursor-pointer">
-                    <div className="shrink-0 w-12 h-12 rounded-2xl bg-blue-50 flex flex-col items-center justify-center text-blue-600 font-bold group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                      <span className="text-xs uppercase">Jan</span>
-                      <span className="text-lg">0{i + 4}</span>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                        Tech Talk: AI in 2026
-                      </h4>
-                      <p className="text-xs text-gray-500 flex items-center gap-1 mt-1">
-                        <MapPin className="h-3 w-3" /> Main Hall • 4 PM
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <Button className="w-full mt-8 rounded-xl bg-slate-100 text-slate-900 hover:bg-slate-200 border-none shadow-none">
-                Explore Calendar
-              </Button>
-            </CardContent>
-          </Card>
+        <aside className="lg:col-span-4 space-y-8">
+          {events === undefined ? (
+            <EventCalendarSkeleton />
+          ) : (
+            <EventCalendarCard events={events} />
+          )}
 
-          {/* PROMO CARD */}
           <div className="rounded-3xl bg-linear-to-br from-indigo-600 to-purple-700 p-6 text-white relative overflow-hidden">
             <div className="relative z-10">
               <h4 className="font-bold text-xl mb-2">Sell your old stuff!</h4>

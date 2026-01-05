@@ -17,6 +17,18 @@ router.get(
   })
 );
 
+router.get(
+  "/:eventId",
+  Middleware.authenticate,
+  Utils.asyncHandler(async (req: Request, res: Response) => {
+    const { eventId } = req.params;
+
+    const result = await EventsService.getEventById(eventId);
+
+    res.json({ success: true, data: result });
+  })
+);
+
 router.post(
   "/:communityId",
   Middleware.validate(eventCreatePayloadSchema),
@@ -28,6 +40,49 @@ router.post(
     const result = await EventsService.createEvent(
       req.body,
       communityId,
+      userId
+    );
+
+    res.json({ success: true, data: result });
+  })
+);
+
+router.post(
+  "/:eventId/join",
+  Middleware.authenticate,
+  Utils.asyncHandler(async (req: Request, res: Response) => {
+    const userId = (req as any).user.id;
+    const { eventId } = req.params;
+
+    const result = await EventsService.joinEvent(eventId, userId);
+
+    res.json({ success: true, data: result });
+  })
+);
+
+router.delete(
+  "/:eventId",
+  Middleware.authenticate,
+  Utils.asyncHandler(async (req: Request, res: Response) => {
+    const userId = (req as any).user.id;
+    const { eventId } = req.params;
+
+    const result = await EventsService.deleteEventById(eventId, userId);
+
+    res.json({ success: true, data: result });
+  })
+);
+
+router.delete(
+  "/:eventId/participant/:participantId",
+  Middleware.authenticate,
+  Utils.asyncHandler(async (req: Request, res: Response) => {
+    const { eventId, participantId } = req.params;
+    const userId = (req as any).user.id;
+
+    const result = await EventsService.deleteEventParticipant(
+      eventId,
+      participantId,
       userId
     );
 

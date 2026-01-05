@@ -18,7 +18,7 @@ import {
   sendJoinRequest,
 } from "@/services/communities";
 import { CommunityDTO } from "@repo/shared-types";
-import { Loader2, Plus, Users } from "lucide-react";
+import { CalendarIcon, Loader2, Plus, Users } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -114,16 +114,34 @@ export default function CommunitiesPage() {
                 Connect, collaborate, and grow with your fellow students.
               </p>
             </div>
-            <Link href="/communities/create">
-              <Button
-                size="lg"
-                className="bg-blue-600 hover:bg-blue-700 rounded-2xl h-14 px-8 text-lg shadow-lg shadow-blue-900/20"
-              >
-                <Plus className="mr-2 h-5 w-5" /> Start a Community
-              </Button>
-            </Link>
+
+            {/* ACTION GROUP */}
+            <div className="flex flex-col sm:flex-row items-center gap-3">
+              {/* NEW: Explore Events Link */}
+              <Link href="/events" className="w-full sm:w-auto">
+                <Button
+                  size="lg"
+                  className="w-full sm:w-auto border-slate-700 bg-slate-800 text-white hover:bg-slate-700 hover:text-white rounded-2xl h-14 px-8 text-lg"
+                >
+                  <CalendarIcon className="mr-2 h-5 w-5 text-blue-400" />
+                  Explore Events
+                </Button>
+              </Link>
+
+              {/* Existing: Create Community */}
+              <Link href="/communities/create" className="w-full sm:w-auto">
+                <Button
+                  size="lg"
+                  className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 rounded-2xl h-14 px-8 text-lg shadow-lg shadow-blue-900/20"
+                >
+                  <Plus className="mr-2 h-5 w-5" /> Start a Community
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
+
+        {/* Background Decor */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -mr-20 -mt-20" />
       </div>
 

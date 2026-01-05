@@ -25,7 +25,13 @@ export const eventSelect = {
   },
 
   community: {
-    select: { id: true, name: true, coverImage: true, description: true },
+    select: {
+      id: true,
+      name: true,
+      coverImage: true,
+      description: true,
+      members: { select: { userId: true } },
+    },
   },
 
   location_format: true,
@@ -51,5 +57,20 @@ export async function getAll(userId: string) {
       ],
     },
     select: eventSelect,
+  });
+}
+
+export async function getById(eventId: string) {
+  return await prisma.event.findUnique({
+    where: {
+      id: eventId,
+    },
+    select: eventSelect,
+  });
+}
+
+export async function getParticipantData(participantId: string) {
+  return await prisma.eventParticipant.findUnique({
+    where: { id: participantId },
   });
 }

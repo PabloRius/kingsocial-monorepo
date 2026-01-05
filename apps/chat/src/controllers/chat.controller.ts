@@ -11,7 +11,17 @@ const messageSelect = {
   senderId: true,
   createdAt: true,
   productRef: { select: { id: true, photos: true, name: true, price: true } },
-  eventRef: true,
+  eventRef: {
+    select: {
+      id: true,
+      title: true,
+      all_day: true,
+      location: true,
+      location_format: true,
+      date: true,
+      community: { select: { id: true, name: true } },
+    },
+  },
 } satisfies Prisma.MessageSelect & Record<keyof MessageDTO, any>;
 
 const chatSelect = {

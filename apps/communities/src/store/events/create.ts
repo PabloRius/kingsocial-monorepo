@@ -24,3 +24,20 @@ export async function createEvent(
     select: eventSelect,
   });
 }
+
+export async function joinEvent(
+  eventId: string,
+  userId: string
+): Promise<boolean> {
+  const result = await prisma.eventParticipant.create({
+    data: {
+      user: { connect: { id: userId } },
+      event: { connect: { id: eventId } },
+      joinedAt: new Date(),
+      role: "participant",
+      allowsMassMessages: true,
+    },
+  });
+
+  return !!result;
+}

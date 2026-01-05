@@ -14,7 +14,21 @@ export const messageSchema = z.object({
       price: z.number(),
     })
     .optional(),
-  eventRef: z.object({}).optional(),
+  eventRef: z
+    .object({
+      id: z.string(),
+      title: z.string(),
+      date: z.date(),
+      start_time: z.string(),
+      location_format: z.string(),
+      location: z.string().nullable(),
+      all_day: z.boolean(),
+      community: z.object({
+        id: z.string(),
+        name: z.string(),
+      }),
+    })
+    .optional(),
 });
 
 export type MessageDTO = z.infer<typeof messageSchema>;

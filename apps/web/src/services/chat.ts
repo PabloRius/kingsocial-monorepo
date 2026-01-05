@@ -1,7 +1,7 @@
 "use server";
 
 import { auth } from "@/lib/auth";
-import { ApiResponse, ChatDTO, MessageDTO } from "@repo/shared-types";
+import { ApiResponse, ChatDTO, EventDTO, MessageDTO } from "@repo/shared-types";
 
 const baseURL = `${process.env.NEXT_PUBLIC_CHAT_URL}/chats`;
 
@@ -120,4 +120,29 @@ export async function sendMessageToCommunity(payload: {
   const result: ApiResponse<MessageDTO> = await response.json();
 
   return result;
+}
+
+export async function sendMessageToEvent(
+  content: string,
+  event: EventDTO,
+  senderId: string
+) {
+  await Promise.all(
+    event.participants.map(async (p) => {
+      if (p.userId === senderId) return;
+      if (p.allowsMassMessages) {
+        try {
+          return await sendMessageWithFallback({
+            content,
+            receiverId: p.userId,
+            eventRefId: event.id,
+          });
+        } catch (error) {
+          console.error(error);
+        }
+      }
+    })
+  );
+
+  return true;
 }

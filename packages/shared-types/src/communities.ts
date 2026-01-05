@@ -33,6 +33,7 @@ export const eventSchema = z.object({
     name: z.string(),
     coverImage: z.string(),
     description: z.string(),
+    members: z.array(z.object({ userId: z.string() })),
   }),
 
   location_format: z.string(),

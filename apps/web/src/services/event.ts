@@ -35,6 +35,30 @@ export async function getAllEvents() {
   return result;
 }
 
+export async function getEventById(eventId: string) {
+  const session = await auth();
+
+  if (!session?.sessionToken) {
+    throw new Error("Unauthorised: No session token found");
+  }
+
+  const response = await fetch(`${baseURL}/${eventId}`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${session.sessionToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch event");
+  }
+
+  const result: ApiResponse<EventDTO> = await response.json();
+
+  return result;
+}
+
 export async function createEvent(
   data: EventCreatePayload,
   communityId: string,
@@ -42,7 +66,6 @@ export async function createEvent(
 ) {
   let uploadedUrl: string = "";
   try {
-    console.log(communityId);
     const url = new URL(`${baseURL}/${communityId}`);
 
     const session = await auth();
@@ -90,4 +113,89 @@ export async function createEvent(
     }
     throw error;
   }
+}
+
+export async function joinEvent(eventId: string) {
+  const session = await auth();
+
+  if (!session?.sessionToken) {
+    throw new Error("Unauthorised: No session token found");
+  }
+
+  const response = await fetch(`${baseURL}/${eventId}/join`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${session.sessionToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch event");
+  }
+
+  const result: ApiResponse<boolean> = await response.json();
+
+  return result;
+}
+
+export async function deleteEventById(eventId: string) {
+  const session = await auth();
+
+  if (!session?.sessionToken) {
+    throw new Error("Unauthorised: No session token found");
+  }
+
+  const response = await fetch(`${baseURL}/${eventId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${session.sessionToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to delete event");
+  }
+
+  const result: ApiResponse<EventDTO> = await response.json();
+
+  try {
+    await deleteFromCloudinary(result.data.coverImage, "events");
+  } catch (cleanupError) {
+    console.error(`Error cleaning up the event coverImage: `, cleanupError);
+    throw cleanupError;
+  }
+
+  return result;
+}
+
+export async function deleteAttendeeFromEvent(
+  eventId: string,
+  participantId: string
+) {
+  const session = await auth();
+
+  if (!session?.sessionToken) {
+    throw new Error("Unauthorised: No session token found");
+  }
+
+  const response = await fetch(
+    `${baseURL}/${eventId}/participant/${participantId}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${session.sessionToken}`,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to remove attendee");
+  }
+
+  const result: ApiResponse<boolean> = await response.json();
+
+  return result;
 }
