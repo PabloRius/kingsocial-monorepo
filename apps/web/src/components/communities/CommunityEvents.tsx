@@ -23,7 +23,7 @@ export const CommunityEvents = ({
         <h3 className="text-xl font-bold text-slate-900">Upcoming Events</h3>
         {isAdmin && (
           <Button asChild className="rounded-xl bg-blue-600">
-            <Link href={`/communities/${communityId}/events/create`}>
+            <Link href={`/communities/${communityId}/create_event`}>
               <Plus className="w-4 h-4 mr-2" /> Create Event
             </Link>
           </Button>

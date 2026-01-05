@@ -126,3 +126,29 @@ export const communityCreatePayloadSchema = z.object({
 export type CommunityCreatePayload = z.infer<
   typeof communityCreatePayloadSchema
 >["body"];
+
+export const eventCreatePayloadSchema = z.object({
+  body: z.object({
+    title: z.string(),
+    description: z.string(),
+    coverImage: z.string(),
+    tags: z.array(z.string()),
+    public: z.boolean(),
+
+    capacity: z.number().nullable(),
+
+    location_format: z.string(),
+    location: z.string().nullable(),
+
+    date: z.coerce.date(),
+    all_day: z.boolean(),
+
+    start_time: z.string().nullable(),
+    end_time: z.string().nullable(),
+  }),
+  params: z.object({ communityId: z.string() }),
+});
+
+export type EventCreatePayload = z.infer<
+  typeof eventCreatePayloadSchema
+>["body"];

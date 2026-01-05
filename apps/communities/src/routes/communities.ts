@@ -15,8 +15,6 @@ router.get(
   })
 );
 
-export default router;
-
 router.get(
   "/me",
   Middleware.authenticate,
@@ -132,3 +130,5 @@ router.delete(
     res.json({ success: true, data: result });
   })
 );
+
+export default router;

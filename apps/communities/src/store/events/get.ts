@@ -1,4 +1,4 @@
-import { Prisma } from "@repo/database";
+import { prisma, Prisma } from "@repo/database";
 import { EventDTO } from "@repo/shared-types";
 
 export const eventSelect = {
@@ -36,3 +36,20 @@ export const eventSelect = {
   start_time: true,
   end_time: true,
 } satisfies Prisma.EventSelect & Record<keyof EventDTO, any>;
+
+export async function getAll(userId: string) {
+  return await prisma.event.findMany({
+    where: {
+      AND: [
+        {
+          OR: [
+            { public: { equals: true } },
+            { participants: { some: { userId: { equals: userId } } } },
+          ],
+        },
+        { date: { gte: new Date() } },
+      ],
+    },
+    select: eventSelect,
+  });
+}

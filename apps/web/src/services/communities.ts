@@ -6,11 +6,10 @@ import {
   ApiResponse,
   CommunityCreatePayload,
   CommunityDTO,
-  EventDTO,
 } from "@repo/shared-types";
 import { deleteFromCloudinary, uploadToCloudinary } from "./cloudinary-utils";
 
-const baseURL = `${process.env.NEXT_PUBLIC_COMMUNITIES_URL}`;
+const baseURL = `${process.env.NEXT_PUBLIC_COMMUNITIES_URL}/communities`;
 
 export async function getOwnCommunities() {
   const session = await auth();
@@ -19,7 +18,7 @@ export async function getOwnCommunities() {
     throw new Error("Unauthorised: No session token found");
   }
 
-  const response = await fetch(`${baseURL}/communities/me`, {
+  const response = await fetch(`${baseURL}/me`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${session.sessionToken}`,
@@ -43,7 +42,7 @@ export async function getAllCommunities() {
     throw new Error("Unauthorised: No session token found");
   }
 
-  const response = await fetch(`${baseURL}/communities`, {
+  const response = await fetch(`${baseURL}`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${session.sessionToken}`,
@@ -60,30 +59,6 @@ export async function getAllCommunities() {
   return result;
 }
 
-export async function getAllEvents() {
-  const session = await auth();
-
-  if (!session?.sessionToken) {
-    throw new Error("Unauthorised: No session token found");
-  }
-
-  const response = await fetch(`${baseURL}/events`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${session.sessionToken}`,
-      "Content-Type": "application/json",
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch events");
-  }
-
-  const result: ApiResponse<EventDTO[]> = await response.json();
-
-  return result;
-}
-
 export async function getCommunityById(communityId: string) {
   const session = await auth();
 
@@ -91,7 +66,7 @@ export async function getCommunityById(communityId: string) {
     throw new Error("Unauthorised: No session token found");
   }
 
-  const response = await fetch(`${baseURL}/communities/${communityId}`, {
+  const response = await fetch(`${baseURL}/${communityId}`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${session.sessionToken}`,
@@ -115,7 +90,7 @@ export async function joinCommunity(communityId: string) {
     throw new Error("Unauthorised: No session token found");
   }
 
-  const response = await fetch(`${baseURL}/communities/${communityId}/join`, {
+  const response = await fetch(`${baseURL}/${communityId}/join`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${session.sessionToken}`,
@@ -142,7 +117,7 @@ export async function stampCommunityJoinRequest(
     throw new Error("Unauthorised: No session token found");
   }
 
-  const response = await fetch(`${baseURL}/communities/request/${requestId}`, {
+  const response = await fetch(`${baseURL}/request/${requestId}`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${session.sessionToken}`,
@@ -170,17 +145,14 @@ export async function sendJoinRequest(
     throw new Error("Unauthorised: No session token found");
   }
 
-  const response = await fetch(
-    `${baseURL}/communities/${communityId}/request`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${session.sessionToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ joinMessage }),
-    }
-  );
+  const response = await fetch(`${baseURL}/${communityId}/request`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${session.sessionToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ joinMessage }),
+  });
 
   if (!response.ok) {
     throw new Error("Failed to request to join community");
@@ -197,7 +169,7 @@ export async function createCommunity(
 ) {
   let uploadedUrl: string = "";
   try {
-    const url = new URL(`${baseURL}/communities`);
+    const url = new URL(`${baseURL}`);
 
     const session = await auth();
 
@@ -220,7 +192,7 @@ export async function createCommunity(
       const errorResult: ApiErrorResponse = await response
         .json()
         .catch(() => ({}));
-      console.error("Error creating item: ", errorResult);
+      console.error("Error creating community: ", errorResult);
       if (uploadedUrl) {
         try {
           await deleteFromCloudinary(uploadedUrl, "communities");
@@ -253,16 +225,13 @@ export async function hasRequested(communityId: string) {
     throw new Error("Unauthorised: No session token found");
   }
 
-  const response = await fetch(
-    `${baseURL}/communities/${communityId}/has_requested`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${session.sessionToken}`,
-        "Content-Type": "application/json",
-      },
-    }
-  );
+  const response = await fetch(`${baseURL}/${communityId}/has_requested`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${session.sessionToken}`,
+      "Content-Type": "application/json",
+    },
+  });
 
   if (!response.ok) {
     throw new Error("Failed to fetch community");
@@ -280,7 +249,7 @@ export async function deleteCommunityById(communityId: string) {
     throw new Error("Unauthorised: No session token found");
   }
 
-  const response = await fetch(`${baseURL}/communities/${communityId}`, {
+  const response = await fetch(`${baseURL}/${communityId}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${session.sessionToken}`,

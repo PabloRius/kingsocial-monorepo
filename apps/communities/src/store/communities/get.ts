@@ -91,3 +91,11 @@ export async function hasRequested(
   );
   return hasRequested || false;
 }
+
+export async function getMemberByUserId(communityId: string, userId: string) {
+  return await prisma.communityMember.findUnique({
+    where: {
+      userId_communityId: { communityId, userId },
+    },
+  });
+}
