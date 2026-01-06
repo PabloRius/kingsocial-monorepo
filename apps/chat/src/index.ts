@@ -1,3 +1,4 @@
+import { prisma } from "@repo/database";
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
@@ -20,9 +21,23 @@ const io = new Server(httpServer, {
 
 io.use(authenticateSocket);
 
-io.on("connection", (socket) => {
+const onlineUsers = new Map<string, string>();
+
+io.on("connection", async (socket) => {
   const userId = (socket as any).user.id;
+  if (!userId) return;
   console.log(`User connected: ${userId}`);
+
+  onlineUsers.set(userId, socket.id);
+
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+
+  if (user?.settings?.showOnlineStatus) {
+    socket.broadcast.emit("user_status_changed", {
+      userId,
+      status: "online",
+    });
+  }
 
   socket.join(userId);
 
@@ -41,7 +56,12 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
+    onlineUsers.delete(userId);
     console.log("User disconnected");
+    socket.broadcast.emit("user_status_changed", {
+      userId,
+      status: "offline",
+    });
   });
 });
 

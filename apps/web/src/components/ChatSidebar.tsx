@@ -7,12 +7,13 @@ import { formatChatTimestamp } from "@/lib/formatters";
 import { Loader2, Search } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
+import { OnlineIndicator } from "./OnlineIndicator";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { Input } from "./ui/input";
 
 export function ChatSidebar() {
   const { profile } = useProfile();
-  const { chats, isSidebarOpen, setIsSidebarOpen } = useChat();
+  const { chats, isSidebarOpen, setIsSidebarOpen, onlineUsers } = useChat();
   const { id: activeChatId } = useParams();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
@@ -60,98 +61,107 @@ export function ChatSidebar() {
             <Loader2 className="animate-spin" />
           </div>
         ) : (
-          filteredChats.map((chat) => (
-            <button
-              key={chat.id}
-              onClick={() => {
-                router.push(`/inbox/${chat.id}`);
-                if (window.innerWidth < 768) setIsSidebarOpen(false);
-              }}
-              className={`flex flex-row gap-4 items-center w-full p-4 text-left hover:bg-gray-50 transition-colors ${
-                activeChatId === chat.id
-                  ? "bg-blue-50 border-l-4 border-blue-600"
-                  : ""
-              }`}
-            >
-              <div className="relative shrink-0">
-                <Avatar>
-                  <AvatarImage
-                    src={
-                      // chat.avatar ||
-                      chat.participants.find((p) => p.user.id !== profile.id)
-                        ?.user.image || "/placeholder.svg"
-                    }
-                    alt={
-                      // chat.avatar
-                      //   ? "Chat Avatar"
-                      chat.participants
+          filteredChats.map((chat) => {
+            const otherParticipant = chat.participants.find(
+              (p) => p.user.id !== profile.id
+            );
+            return (
+              <button
+                key={chat.id}
+                onClick={() => {
+                  router.push(`/inbox/${chat.id}`);
+                  if (window.innerWidth < 768) setIsSidebarOpen(false);
+                }}
+                className={`flex flex-row gap-4 items-center w-full p-4 text-left hover:bg-gray-50 transition-colors ${
+                  activeChatId === chat.id
+                    ? "bg-blue-50 border-l-4 border-blue-600"
+                    : ""
+                }`}
+              >
+                <div className="relative shrink-0">
+                  <Avatar>
+                    <AvatarImage
+                      src={
+                        // chat.avatar ||
+
+                        otherParticipant?.user.image || "/placeholder.svg"
+                      }
+                      alt={
+                        // chat.avatar
+                        //   ? "Chat Avatar"
+                        chat.participants
+                          .filter((p) => p.user.id !== profile.id)
+                          .map((p) => p.user.name)
+                          .join(", ")
+                      }
+                    />
+                  </Avatar>
+
+                  {otherParticipant && (
+                    <OnlineIndicator
+                      currentOnlineList={onlineUsers}
+                      userId={otherParticipant.userId}
+                      userSettings={profile.settings}
+                    />
+                  )}
+                </div>
+
+                <div className="flex-1 min-w-0 text-left">
+                  <div className="flex items-center justify-between mb-1">
+                    <h3 className="font-semibold text-gray-900 truncate">
+                      {chat.participants
                         .filter((p) => p.user.id !== profile.id)
                         .map((p) => p.user.name)
-                        .join(", ")
-                    }
-                  />
-                </Avatar>
+                        .join(", ")}
+                    </h3>
+                    <span className="text-xs text-gray-500 shrink-0">
+                      {chat.messages.at(-1)?.createdAt
+                        ? formatChatTimestamp(
+                            new Date(chat.messages.at(-1)!.createdAt)
+                          )
+                        : ""}
+                    </span>
+                  </div>
+                  {chat.messages.length > 0 && (
+                    <div className="flex items-left justify-between min-w-0">
+                      <p className="text-sm text-gray-600 truncate">
+                        {(() => {
+                          const lastMessage = chat.messages.at(-1);
+                          if (!lastMessage) return "";
 
-                {/* {chat.online && (
-    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
-  )} */}
-              </div>
+                          const senderId = lastMessage.senderId;
+                          const senderName = chat.participants.find(
+                            (p) => p.user.id === senderId
+                          )?.user.name;
+                          const isFromLoggedUser = senderId === profile.id;
 
-              <div className="flex-1 min-w-0 text-left">
-                <div className="flex items-center justify-between mb-1">
-                  <h3 className="font-semibold text-gray-900 truncate">
-                    {chat.participants
-                      .filter((p) => p.user.id !== profile.id)
-                      .map((p) => p.user.name)
-                      .join(", ")}
-                  </h3>
-                  <span className="text-xs text-gray-500 shrink-0">
-                    {chat.messages.at(-1)?.createdAt
-                      ? formatChatTimestamp(
-                          new Date(chat.messages.at(-1)!.createdAt)
-                        )
-                      : ""}
-                  </span>
-                </div>
-                {chat.messages.length > 0 && (
-                  <div className="flex items-left justify-between min-w-0">
-                    <p className="text-sm text-gray-600 truncate">
-                      {(() => {
-                        const lastMessage = chat.messages.at(-1);
-                        if (!lastMessage) return "";
+                          if (isFromLoggedUser) {
+                            return `You: ${lastMessage.content}`;
+                          }
 
-                        const senderId = lastMessage.senderId;
-                        const senderName = chat.participants.find(
-                          (p) => p.user.id === senderId
-                        )?.user.name;
-                        const isFromLoggedUser = senderId === profile.id;
+                          if (chat.participants.length === 2) {
+                            // One-to-one chat → just show content
+                            return lastMessage.content;
+                          }
 
-                        if (isFromLoggedUser) {
-                          return `You: ${lastMessage.content}`;
-                        }
+                          // Group chat → show name: content
+                          return `${senderName || "Unknown"}: ${
+                            lastMessage.content
+                          }`;
+                        })()}
+                      </p>
 
-                        if (chat.participants.length === 2) {
-                          // One-to-one chat → just show content
-                          return lastMessage.content;
-                        }
-
-                        // Group chat → show name: content
-                        return `${senderName || "Unknown"}: ${
-                          lastMessage.content
-                        }`;
-                      })()}
-                    </p>
-
-                    {/* {chat.unread > 0 && (
+                      {/* {chat.unread > 0 && (
                       <span className="ml-2 flex-shrink-0 w-5 h-5 bg-blue-600 text-white text-xs rounded-full flex items-center justify-center">
                         {chat.unread}
                       </span>
                     )} */}
-                  </div>
-                )}
-              </div>
-            </button>
-          ))
+                    </div>
+                  )}
+                </div>
+              </button>
+            );
+          })
         )}
       </ScrollArea>
     </div>

@@ -11,6 +11,7 @@ export const profileSelect = {
   coverImage: true,
   createdAt: true,
   bookmarkedProducts: true,
+  settings: true,
 
   sellerProfile: {
     select: {

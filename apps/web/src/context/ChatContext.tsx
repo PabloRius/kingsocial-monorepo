@@ -8,6 +8,7 @@ import { useParams } from "next/navigation";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { toast } from "sonner";
+import { useProfile } from "./ProfileContext";
 
 interface ChatContextType {
   chats: ChatDTO[] | undefined | null;
@@ -15,6 +16,7 @@ interface ChatContextType {
   isSidebarOpen: boolean;
   setIsSidebarOpen: (open: boolean) => void;
   socket: Socket | null;
+  onlineUsers: string[];
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
@@ -27,12 +29,15 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     currentPathIdRef.current = (params?.id as string) || null;
   }, [params?.id]);
   const [chats, setChats] = useState<ChatDTO[] | undefined | null>(undefined);
+  const { profile } = useProfile();
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
 
   const [socket, setSocket] = useState<Socket | null>(null);
   const socketRef = useRef<Socket | null>(null);
 
   const currentCommunityRef = useRef<string | null>(null);
+
+  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
 
   useEffect(() => {
     currentCommunityRef.current = (params?.communityId as string) || null;
@@ -143,6 +148,26 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     };
   }, [session]);
 
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("user_status_changed", ({ userId, status }) => {
+      if (!profile?.settings?.showOnlineStatus) {
+        setOnlineUsers([]);
+        return;
+      }
+
+      setOnlineUsers((prev) => {
+        if (status === "online") return [...new Set([...prev, userId])];
+        return prev.filter((id) => id !== userId);
+      });
+    });
+
+    return () => {
+      socket.off("user_status_changed");
+    };
+  }, [socket, profile]);
+
   return (
     <ChatContext.Provider
       value={{
@@ -151,6 +176,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         isSidebarOpen,
         setIsSidebarOpen,
         socket,
+        onlineUsers,
       }}
     >
       {children}

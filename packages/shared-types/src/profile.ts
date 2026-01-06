@@ -18,6 +18,10 @@ export const ProfileDTOSchema = z.object({
   coverImage: z.string().nullable(),
   createdAt: z.date().or(z.string()),
   bookmarkedProducts: z.array(z.string()),
+  settings: z.object({
+    showOnlineStatus: z.boolean(),
+    notificationsEnabled: z.boolean(),
+  }),
   sellerProfile: z
     .object({
       id: z.string(),

@@ -1,5 +1,6 @@
 "use client";
 
+import { OnlineIndicator } from "@/components/OnlineIndicator";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,7 +34,7 @@ export default function InboxPage() {
 
   const { status } = useSession();
   const { profile } = useProfile();
-  const { chats, socket, setIsSidebarOpen } = useChat();
+  const { chats, socket, setIsSidebarOpen, onlineUsers } = useChat();
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -114,10 +115,10 @@ export default function InboxPage() {
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
-              <div className="relative">
+              <div className="relative flex items-center">
                 <Link
                   href={`/profile/${otherParticipant?.userId}`}
-                  className="block group relative"
+                  className="block group"
                 >
                   <Avatar className="transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:ring-2 group-hover:ring-blue-500 group-hover:ring-offset-2 ring-offset-white shadow-sm">
                     <AvatarImage
@@ -131,9 +132,13 @@ export default function InboxPage() {
                     View Profile
                   </span>
                 </Link>
-                {/* {selectedChatData?.online && (
-                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white" />
-                  )} */}
+                {otherParticipant && (
+                  <OnlineIndicator
+                    currentOnlineList={onlineUsers}
+                    userId={otherParticipant?.userId}
+                    userSettings={profile.settings}
+                  />
+                )}
               </div>
               <div>
                 <h2 className="font-semibold text-gray-900">

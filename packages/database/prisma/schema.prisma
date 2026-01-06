@@ -18,6 +18,11 @@ type SocialLink {
   url       String
 }
 
+type UserSettings {
+  showOnlineStatus      Boolean @default(true)
+  notificationsEnabled  Boolean @default(true)
+}
+
 // Prisma auth adapter - start
 model User {
   id                      String            @id @default(auto()) @map("_id") @db.ObjectId
@@ -27,6 +32,7 @@ model User {
   image                   String?
   accounts                Account[]
   sessions                Session[]
+  settings                UserSettings?
  
   createdAt               DateTime          @default(now())
   updatedAt               DateTime          @updatedAt
