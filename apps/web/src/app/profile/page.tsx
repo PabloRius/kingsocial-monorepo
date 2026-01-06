@@ -228,7 +228,7 @@ export default function OwnProfilePage() {
         {/* Profile Header */}
         <div className="relative mb-8">
           {/* Cover Image */}
-          <div className="h-48 md:h-64 rounded-xl overflow-hidden bg-linear-to-r from-celestial-blue-400 to-picton-blue-500 relative group">
+          <div className="h-56 md:h-64 rounded-xl overflow-hidden bg-linear-to-r from-celestial-blue-400 to-picton-blue-500 relative group">
             {imagesData.coverImage && (
               <Image
                 src={imagesData.coverImage}
@@ -265,7 +265,7 @@ export default function OwnProfilePage() {
             )}
 
             {/* Content Overlay */}
-            <div className="absolute inset-0 flex flex-col justify-center items-start text-center px-6">
+            <div className="absolute inset-0 flex flex-col justify-center items-center lg:items-start text-center p-6">
               <div className="flex flex-col md:flex-row items-center gap-6">
                 {/* Avatar */}
                 <div className="relative group">
@@ -301,7 +301,7 @@ export default function OwnProfilePage() {
                   <h1 className="text-3xl font-bold text-left">
                     {profile.name}
                   </h1>
-                  <div className="flex items-center gap-2 text-blue-200 font-medium">
+                  <div className="hidden lg:flex items-center gap-2 text-blue-200 font-medium">
                     <GraduationCap className="h-4 w-4" />
                     {formData.degree}
                   </div>
