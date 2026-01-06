@@ -4,7 +4,7 @@ import { getChats } from "@/services/chat";
 import { ChatDTO, MessageDTO } from "@repo/shared-types";
 import { Users } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import { toast } from "sonner";
@@ -17,27 +17,23 @@ interface ChatContextType {
   setIsSidebarOpen: (open: boolean) => void;
   socket: Socket | null;
   onlineUsers: string[];
+  unreadTotals: Record<string, number>;
+  globalUnreadCount: number;
 }
 
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export function ChatProvider({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const { data: session } = useSession();
   const params = useParams();
   const currentPathIdRef = useRef<string | null>(null);
-  useEffect(() => {
-    currentPathIdRef.current = (params?.id as string) || null;
-  }, [params?.id]);
-  const [chats, setChats] = useState<ChatDTO[] | undefined | null>(undefined);
-  const { profile } = useProfile();
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
+  const [unreadTotals, setUnreadTotals] = useState<Record<string, number>>({});
 
   const [socket, setSocket] = useState<Socket | null>(null);
   const socketRef = useRef<Socket | null>(null);
 
-  const currentCommunityRef = useRef<string | null>(null);
-
-  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+  const [chats, setChats] = useState<ChatDTO[] | undefined | null>(undefined);
 
   useEffect(() => {
     currentCommunityRef.current = (params?.communityId as string) || null;
@@ -49,7 +45,29 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     const init = async () => {
       try {
         const result = await getChats();
-        setChats(result.data);
+        const chatData: ChatDTO[] = result.data;
+        setChats(chatData);
+
+        const initialTotals: Record<string, number> = {};
+
+        chatData.forEach((chat) => {
+          const myParticipant = chat.participants.find(
+            (p) => p.userId === session.user.id
+          );
+
+          if (myParticipant) {
+            const lastRead = new Date(myParticipant.lastReadAt).getTime();
+
+            const unreadCount = chat.messages.filter(
+              (m) =>
+                new Date(m.createdAt).getTime() > lastRead &&
+                m.senderId !== session.user.id
+            ).length;
+
+            initialTotals[chat.id] = unreadCount;
+          }
+        });
+        setUnreadTotals(initialTotals);
       } catch (error) {
         console.error(error);
         setChats(null);
@@ -70,6 +88,35 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     }, 0);
 
     s.on("receive_message", (newMessage: MessageDTO) => {
+      const isFromMe = newMessage.senderId === session.user.id;
+      const isLookingAtChat = currentPathIdRef.current === newMessage.chatId;
+
+      if (!isFromMe) {
+        if (isLookingAtChat) {
+          s.emit("mark_as_read", { chatId: newMessage.chatId });
+        } else {
+          setUnreadTotals((prev) => ({
+            ...prev,
+            [newMessage.chatId]: (prev[newMessage.chatId] || 0) + 1,
+          }));
+
+          toast.info("New message", {
+            description: newMessage.content,
+            action: {
+              label: "View",
+              onClick: () => {
+                setUnreadTotals((prev) => ({
+                  ...prev,
+                  [newMessage.chatId]: 0,
+                }));
+                s.emit("mark_as_read", { chatId: newMessage.chatId });
+                router.push(`/inbox/${newMessage.chatId}`);
+              },
+            },
+          });
+        }
+      }
+
       setChats((prev) => {
         if (!prev) return prev;
         const chatIndex = prev.findIndex((c) => c.id === newMessage.chatId);
@@ -84,20 +131,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
           (m) => m.id === newMessage.id
         );
         if (messageExists) return prev;
-
-        const isFromMe = newMessage.senderId === session.user.id;
-        const isLookingAtChat = currentPathIdRef.current === newMessage.chatId;
-
-        if (!isFromMe && !isLookingAtChat) {
-          toast.info("New message", {
-            description: newMessage.content,
-            action: {
-              label: "View",
-              onClick: () =>
-                (window.location.href = `/inbox/${newMessage.chatId}`),
-            },
-          });
-        }
 
         return prev
           ?.map((chat) =>
@@ -139,12 +172,45 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     );
 
     return () => {
+      s.off("receive_message");
+      s.off("community_notifications");
       clearTimeout(timeoutId);
       s.disconnect();
       socketRef.current = null;
       setSocket(null);
     };
-  }, [session]);
+  }, [session, router]);
+
+  useEffect(() => {
+    const chatId = (params?.id as string) || null;
+    currentPathIdRef.current = chatId;
+
+    if (chatId) {
+      const timeoutId = setTimeout(() => {
+        setUnreadTotals((prev) => {
+          if (prev[chatId] === 0) return prev;
+          return { ...prev, [chatId]: 0 };
+        });
+
+        if (socketRef.current?.connected) {
+          socketRef.current.emit("mark_as_read", { chatId });
+        }
+      }, 0);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [params?.id]);
+  const { profile } = useProfile();
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
+
+  const currentCommunityRef = useRef<string | null>(null);
+
+  const [onlineUsers, setOnlineUsers] = useState<string[]>([]);
+
+  const globalUnreadCount = Object.values(unreadTotals).reduce(
+    (a, b) => a + b,
+    0
+  );
 
   useEffect(() => {
     if (!socket) return;
@@ -175,6 +241,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         setIsSidebarOpen,
         socket,
         onlineUsers,
+        unreadTotals,
+        globalUnreadCount,
       }}
     >
       {children}

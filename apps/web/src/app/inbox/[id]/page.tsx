@@ -79,7 +79,7 @@ export default function InboxPage() {
     }
   };
 
-  if ((!selectedChatData && chats !== undefined) || status === "loading") {
+  if (!selectedChatData && chats !== undefined) {
     return (
       <div className="flex-1 flex items-center justify-center">
         Chat not found
@@ -136,7 +136,7 @@ export default function InboxPage() {
                   <OnlineIndicator
                     currentOnlineList={onlineUsers}
                     userId={otherParticipant?.userId}
-                    userSettings={profile.settings}
+                    userSettings={profile.settings || undefined}
                   />
                 )}
               </div>

@@ -46,6 +46,25 @@ io.on("connection", async (socket) => {
     console.log(`User ${userId} joined room ${chatId}`);
   });
 
+  socket.on("mark_as_read", async ({ chatId }: { chatId: string }) => {
+    try {
+      await prisma.chatParticipant.update({
+        where: { chatId_userId: { chatId, userId } },
+        data: {
+          lastReadAt: new Date(),
+        },
+      });
+
+      socket.to(chatId).emit("messages_read", {
+        chatId,
+        userId,
+        readAt: new Date(),
+      });
+    } catch (error) {
+      console.error("Error marking as read:", error);
+    }
+  });
+
   socket.on("join_community", (communityId: string) => {
     socket.join(`community_${communityId}`);
     console.log(`User ${userId} joined community: ${communityId}`);

@@ -13,7 +13,8 @@ import { Input } from "./ui/input";
 
 export function ChatSidebar() {
   const { profile } = useProfile();
-  const { chats, isSidebarOpen, setIsSidebarOpen, onlineUsers } = useChat();
+  const { chats, isSidebarOpen, setIsSidebarOpen, onlineUsers, unreadTotals } =
+    useChat();
   const { id: activeChatId } = useParams();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
@@ -65,6 +66,7 @@ export function ChatSidebar() {
             const otherParticipant = chat.participants.find(
               (p) => p.user.id !== profile.id
             );
+            const count = unreadTotals[chat.id] || 0;
             return (
               <button
                 key={chat.id}
@@ -101,7 +103,7 @@ export function ChatSidebar() {
                     <OnlineIndicator
                       currentOnlineList={onlineUsers}
                       userId={otherParticipant.userId}
-                      userSettings={profile.settings}
+                      userSettings={profile.settings || undefined}
                     />
                   )}
                 </div>
@@ -151,11 +153,11 @@ export function ChatSidebar() {
                         })()}
                       </p>
 
-                      {/* {chat.unread > 0 && (
-                      <span className="ml-2 flex-shrink-0 w-5 h-5 bg-blue-600 text-white text-xs rounded-full flex items-center justify-center">
-                        {chat.unread}
-                      </span>
-                    )} */}
+                      {count > 0 && (
+                        <span className="absolute top-0 right-0 bg-blue-600 text-white text-[10px] rounded-full h-5 w-5 flex items-center justify-center border-2 border-white">
+                          {count > 9 ? "9+" : count}
+                        </span>
+                      )}
                     </div>
                   )}
                 </div>

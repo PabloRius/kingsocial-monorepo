@@ -158,6 +158,8 @@ model ChatParticipant {
   chatId String       @db.ObjectId
   userId String       @db.ObjectId
 
+  lastReadAt          DateTime? @default(now())
+
   chat   Chat         @relation(fields: [chatId], references: [id])
   user   User         @relation(fields: [userId], references: [id])
 

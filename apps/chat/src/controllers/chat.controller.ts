@@ -32,9 +32,11 @@ const chatSelect = {
       id: true,
       userId: true,
       chatId: true,
+      lastReadAt: true,
       user: { select: { id: true, image: true, name: true } },
     },
   },
+
   createdAt: true,
   updatedAt: true,
 } satisfies Prisma.ChatSelect & Record<keyof ChatDTO, any>;
