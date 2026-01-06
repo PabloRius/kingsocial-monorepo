@@ -7,6 +7,7 @@ import {
   CommunityCreatePayload,
   CommunityDTO,
   CommunityMember,
+  CommunityUpdatePayload,
 } from "@repo/shared-types";
 import { deleteFromCloudinary, uploadToCloudinary } from "./cloudinary-utils";
 
@@ -205,6 +206,75 @@ export async function createCommunity(
     }
 
     const result: ApiResponse<CommunityDTO> = await response.json();
+
+    return result;
+  } catch (error) {
+    if (uploadedUrl) {
+      try {
+        await deleteFromCloudinary(uploadedUrl, "communities");
+      } catch (cleanupError) {
+        console.error("Cleanup failed: ", cleanupError);
+      }
+    }
+    throw error;
+  }
+}
+
+export async function updateCommunity(
+  communityId: string,
+  data: CommunityUpdatePayload,
+  coverImageFile: File | null
+) {
+  let uploadedUrl: string | null = "";
+  try {
+    const url = new URL(`${baseURL}/${communityId}`);
+
+    const session = await auth();
+
+    if (!session?.sessionToken) {
+      throw new Error("Unauthorised: No session token found");
+    }
+
+    uploadedUrl = coverImageFile
+      ? await uploadToCloudinary(coverImageFile, "communities")
+      : null;
+
+    const response = await fetch(url.toString(), {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${session.sessionToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ...data,
+        ...(coverImageFile ? { coverImage: uploadedUrl } : {}),
+      }),
+    });
+
+    if (!response.ok) {
+      const errorResult: ApiErrorResponse = await response
+        .json()
+        .catch(() => ({}));
+      console.error("Error updating community: ", errorResult);
+      if (uploadedUrl) {
+        try {
+          await deleteFromCloudinary(uploadedUrl, "communities");
+        } catch (cleanupError) {
+          console.error("Cleanup failed: ", cleanupError);
+        }
+      }
+      return errorResult;
+    }
+
+    const result: ApiResponse<CommunityDTO> = await response.json();
+
+    if (uploadedUrl) {
+      try {
+        await deleteFromCloudinary(data.coverImage, "communities");
+      } catch (cleanupError) {
+        console.error("Cleanup failed: ", cleanupError);
+      }
+    }
 
     return result;
   } catch (error) {

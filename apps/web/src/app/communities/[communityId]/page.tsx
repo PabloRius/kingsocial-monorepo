@@ -9,7 +9,7 @@ import {
   Users,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 // Components
@@ -33,12 +33,10 @@ import {
 } from "@/services/communities";
 import { CommunityDTO } from "@repo/shared-types";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
-export default function CommunityPage({
-  params,
-}: {
-  params: Promise<{ communityId: string }>;
-}) {
+export default function CommunityPage() {
+  const { communityId } = useParams<{ communityId: string }>();
   const { status, data: session } = useSession();
   const [community, setCommunity] = useState<CommunityDTO | null>(null);
   const [loading, setLoading] = useState(true);
@@ -48,33 +46,34 @@ export default function CommunityPage({
     undefined
   );
 
-  useEffect(() => {
-    const init = async () => {
-      try {
-        const { communityId } = await params;
-        const result = await getCommunityById(communityId);
-        const communityData = result.data || null;
-        setCommunity(communityData);
+  const fetchCommunity = useCallback(async () => {
+    try {
+      if (!communityId) return;
+      const result = await getCommunityById(communityId);
+      const communityData = result.data || null;
+      setCommunity(communityData);
 
-        // Check if user has a pending request if not a member and community is private
-        if (communityData && session?.user.id) {
-          const isMember = communityData.members.some(
-            (m) => m.userId === session.user.id
-          );
-          if (!isMember && communityData.mode === "private") {
-            const result = await hasRequested(communityId);
-            setIsRequested(result.data);
-          }
+      // Check if user has a pending request if not a member and community is private
+      if (communityData && session?.user.id) {
+        const isMember = communityData.members.some(
+          (m) => m.userId === session.user.id
+        );
+        if (!isMember && communityData.mode === "private") {
+          const result = await hasRequested(communityId);
+          setIsRequested(result.data);
         }
-      } catch (error) {
-        console.error(error);
-        setCommunity(null);
-      } finally {
-        setLoading(false);
       }
-    };
-    init();
-  }, [params, session?.user.id]);
+    } catch (error) {
+      console.error(error);
+      setCommunity(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [communityId, session?.user.id]);
+
+  useEffect(() => {
+    fetchCommunity();
+  }, [fetchCommunity]);
 
   const handleInstantJoin = async () => {
     if (!community) return;
@@ -241,6 +240,7 @@ export default function CommunityPage({
         open={settingsOpen}
         onOpenChange={setSettingsOpen}
         community={community}
+        reloadCommunity={fetchCommunity}
       />
     </div>
   );

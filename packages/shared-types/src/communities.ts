@@ -129,6 +129,14 @@ export type CommunityCreatePayload = z.infer<
   typeof communityCreatePayloadSchema
 >["body"];
 
+export const communityUpdatePayloadSchema = communityCreatePayloadSchema.extend(
+  { params: z.object({ communityId: z.string() }) }
+);
+
+export type CommunityUpdatePayload = z.infer<
+  typeof communityUpdatePayloadSchema
+>["body"];
+
 export const eventCreatePayloadSchema = z.object({
   body: z.object({
     title: z.string(),

@@ -1,5 +1,8 @@
 import { Middleware, Utils } from "@repo/backend-utils";
-import { communityCreatePayloadSchema } from "@repo/shared-types";
+import {
+  communityCreatePayloadSchema,
+  communityUpdatePayloadSchema,
+} from "@repo/shared-types";
 import { Request, Response, Router } from "express";
 import * as CommunitiesService from "../services/communities.service";
 
@@ -109,6 +112,24 @@ router.post(
     const result = await CommunitiesService.processJoinRequest(
       requestId,
       status
+    );
+
+    res.json({ success: true, data: result });
+  })
+);
+
+router.put(
+  "/:communityId",
+  Middleware.validate(communityUpdatePayloadSchema),
+  Middleware.authenticate,
+  Utils.asyncHandler(async (req: Request, res: Response) => {
+    const { communityId } = req.params;
+    const userId = (req as any).user.id;
+
+    const result = await CommunitiesService.updateCommunity(
+      communityId,
+      req.body,
+      userId
     );
 
     res.json({ success: true, data: result });

@@ -1,6 +1,9 @@
 import { Errors } from "@repo/backend-utils";
 import { prisma } from "@repo/database";
-import { CommunityCreatePayload } from "@repo/shared-types";
+import {
+  CommunityCreatePayload,
+  CommunityUpdatePayload,
+} from "@repo/shared-types";
 import * as CommunitiesStore from "../store/communities";
 
 export async function getAllCommunities() {
@@ -96,6 +99,27 @@ export async function processJoinRequest(requestId: string, status: string) {
   const { communityId, userId } = requestData;
 
   const result = await CommunitiesStore.joinCommunity(communityId, userId);
+
+  return result;
+}
+
+export async function updateCommunity(
+  communityId: string,
+  data: CommunityUpdatePayload,
+  userId: string
+) {
+  const memberData = await CommunitiesStore.getMemberByUserId(
+    communityId,
+    userId
+  );
+
+  if (!memberData || memberData.role !== "admin")
+    throw new Errors.APIError(
+      "Only admins can modify the community settings",
+      403
+    );
+
+  const result = await CommunitiesStore.updateCommunity(communityId, data);
 
   return result;
 }

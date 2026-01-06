@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { deleteCommunityById } from "@/services/communities";
+import { deleteCommunityById, updateCommunity } from "@/services/communities";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { CommunityDTO } from "@repo/shared-types";
 import {
@@ -16,7 +16,10 @@ import {
   Save,
   ShieldAlert,
   Trash2,
+  Upload,
+  X,
 } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -25,27 +28,46 @@ interface SettingsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   community: CommunityDTO;
+  reloadCommunity: () => void;
 }
 
 export const CommunitySettingsModal = ({
   open,
   onOpenChange,
   community,
+  reloadCommunity,
 }: SettingsModalProps) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: community.name,
     description: community.description,
-    mode: community.mode,
+    mode: community.mode as "public" | "private",
+    coverImage: community.coverImage,
   });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(
+    community.coverImage || null
+  );
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        return toast.error("Image must be less than 5MB");
+      }
+      setSelectedFile(file);
+      setPreview(URL.createObjectURL(file));
+    }
+  };
 
   const handleSave = async () => {
     setLoading(true);
     try {
-      // await updateCommunity(community.id, formData);
+      await updateCommunity(community.id, formData, selectedFile);
       toast.success("Community settings updated");
       onOpenChange(false);
+      reloadCommunity();
     } catch (error) {
       console.error(error);
       toast.error("Failed to update settings");
@@ -109,7 +131,73 @@ export const CommunitySettingsModal = ({
             {/* Content Area */}
             <div className="flex-1 flex flex-col">
               <div className="flex-1 p-8 pt-14 overflow-y-auto">
-                <TabsContent value="general" className="mt-0 space-y-6">
+                <TabsContent value="general" className="mt-0 space-y-8">
+                  {/* Cover Image Modification Section */}
+                  <div className="space-y-4">
+                    <Label className="text-sm font-bold text-slate-700">
+                      Cover Image
+                    </Label>
+                    <div className="relative group h-40 w-full rounded-2xl overflow-hidden border border-slate-100 bg-slate-50">
+                      {preview ? (
+                        <>
+                          <Image
+                            src={preview}
+                            alt="Cover preview"
+                            fill
+                            className="object-cover"
+                          />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="sm"
+                              className="rounded-xl"
+                              onClick={() =>
+                                document.getElementById("cover-upload")?.click()
+                              }
+                            >
+                              <Upload className="w-4 h-4 mr-2" /> Change
+                            </Button>
+                            {preview !== community.coverImage && (
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                className="rounded-xl"
+                                onClick={() => {
+                                  setPreview(community.coverImage || null);
+                                  setSelectedFile(null);
+                                }}
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            document.getElementById("cover-upload")?.click()
+                          }
+                          className="flex flex-col items-center justify-center w-full h-full text-slate-400 hover:text-blue-500 transition-colors"
+                        >
+                          <Upload className="w-8 h-8 mb-2" />
+                          <span className="text-xs font-medium">
+                            Upload Image
+                          </span>
+                        </button>
+                      )}
+                      <input
+                        id="cover-upload"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleImageChange}
+                      />
+                    </div>
+                  </div>
+
                   <div className="space-y-2">
                     <Label>Community Name</Label>
                     <Input
