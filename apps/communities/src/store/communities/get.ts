@@ -34,6 +34,7 @@ export const communitySelect = {
       role: true,
       joinedAt: true,
       user: { select: { name: true, image: true } },
+      chatAlerts: true,
     },
   },
   joinRequests: {

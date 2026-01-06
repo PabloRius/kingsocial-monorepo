@@ -214,7 +214,7 @@ export default function CommunityPage({
               <CommunityChat
                 initialMessages={community.chat}
                 communityId={community.id}
-                memberId={memberData.id}
+                member={memberData}
               />
             </TabsContent>
 

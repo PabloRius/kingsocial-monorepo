@@ -26,7 +26,7 @@ export async function sendMessage(req: Request, res: Response) {
 
   community?.members.forEach((member) => {
     // Don't send a toast to the person who just sent the message
-    if (member.userId !== (req as any).user.id) {
+    if (member.userId !== (req as any).user.id && member.chatAlerts === true) {
       io.to(member.userId).emit("community_notification", {
         communityName: community.name,
         communityId: community.id,

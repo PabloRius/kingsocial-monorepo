@@ -100,6 +100,22 @@ export async function processJoinRequest(requestId: string, status: string) {
   return result;
 }
 
+export async function updateCommunityMemberSettings(
+  communityId: string,
+  userId: string,
+  settings: { chatAlerts: boolean }
+) {
+  const memberData = await CommunitiesStore.getMemberByUserId(
+    communityId,
+    userId
+  );
+
+  if (!memberData)
+    throw new Errors.APIError("User is not a member of the community", 400);
+
+  return await CommunitiesStore.updateMemberSettings(memberData.id, settings);
+}
+
 export async function deleteCommunityById(communityId: string, userId: string) {
   const community = await CommunitiesStore.getById(communityId);
 

@@ -115,6 +115,23 @@ router.post(
   })
 );
 
+router.put(
+  "/:communityId/update_member_settings",
+  Middleware.authenticate,
+  Utils.asyncHandler(async (req: Request, res: Response) => {
+    const { communityId } = req.params;
+    const userId = (req as any).user.id;
+
+    const result = await CommunitiesService.updateCommunityMemberSettings(
+      communityId,
+      userId,
+      req.body
+    );
+
+    res.json({ success: true, data: result });
+  })
+);
+
 router.delete(
   "/:communityId",
   Middleware.authenticate,

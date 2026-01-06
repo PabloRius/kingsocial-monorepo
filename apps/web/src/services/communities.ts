@@ -6,6 +6,7 @@ import {
   ApiResponse,
   CommunityCreatePayload,
   CommunityDTO,
+  CommunityMember,
 } from "@repo/shared-types";
 import { deleteFromCloudinary, uploadToCloudinary } from "./cloudinary-utils";
 
@@ -273,4 +274,35 @@ export async function deleteCommunityById(communityId: string) {
   }
 
   return !!result;
+}
+
+export async function updateCommunityMemberSettings(
+  communityId: string,
+  settings: { chatAlerts: boolean }
+) {
+  const session = await auth();
+
+  if (!session?.sessionToken) {
+    throw new Error("Unauthorised: No session token found");
+  }
+
+  const response = await fetch(
+    `${baseURL}/${communityId}/update_member_settings`,
+    {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${session.sessionToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(settings),
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to update settings");
+  }
+
+  const result: ApiResponse<CommunityMember> = await response.json();
+
+  return result;
 }

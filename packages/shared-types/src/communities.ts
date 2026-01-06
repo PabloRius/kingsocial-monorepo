@@ -77,6 +77,7 @@ export const communityMemberSchema = z.object({
   }),
   communityId: z.string(),
   joinedAt: z.date(),
+  chatAlerts: z.boolean(),
 });
 
 export type CommunityMember = z.infer<typeof communityMemberSchema>;
