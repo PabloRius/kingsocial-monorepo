@@ -70,7 +70,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     }, 0);
 
     s.on("receive_message", (newMessage: MessageDTO) => {
-      console.log("MEsagge received");
       setChats((prev) => {
         if (!prev) return prev;
         const chatIndex = prev.findIndex((c) => c.id === newMessage.chatId);
@@ -90,7 +89,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         const isLookingAtChat = currentPathIdRef.current === newMessage.chatId;
 
         if (!isFromMe && !isLookingAtChat) {
-          console.log("Should toast");
           toast.info("New message", {
             description: newMessage.content,
             action: {

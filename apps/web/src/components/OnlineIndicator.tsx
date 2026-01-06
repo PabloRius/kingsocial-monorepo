@@ -14,8 +14,6 @@ export function OnlineIndicator({
 
   const isOnline = currentOnlineList.includes(userId);
 
-  console.log(currentOnlineList, userId);
-
   if (!isOnline) return null;
 
   return (
