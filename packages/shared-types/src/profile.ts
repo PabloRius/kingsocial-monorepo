@@ -18,6 +18,21 @@ export const ProfileDTOSchema = z.object({
   coverImage: z.string().nullable(),
   createdAt: z.date().or(z.string()),
   bookmarkedProducts: z.array(z.string()),
+  kNumber: z.string().nullable(),
+  degree: z.string().nullable(),
+  studyLevel: z.string().nullable(),
+  _count: z.object({ communities: z.number() }),
+  communities: z.array(
+    z.object({
+      community: z.object({
+        id: z.string(),
+        coverImage: z.string(),
+        name: z.string(),
+      }),
+      role: z.string(),
+      joinedAt: z.date(),
+    })
+  ),
   settings: z
     .object({
       showOnlineStatus: z.boolean(),
@@ -42,10 +57,13 @@ export const ProfileUpdateSchema = z.object({
     socialLinks: z.array(socialLinkSchema).max(10),
     image: z.string(),
     coverImage: z.string(),
-  }),
-  settings: z.object({
-    showOnlineStatus: z.boolean(),
-    notificationsEnabled: z.boolean(),
+    kNumber: z.string().nullable(),
+    degree: z.string().nullable(),
+    studyLevel: z.string().nullable(),
+    settings: z.object({
+      showOnlineStatus: z.boolean(),
+      notificationsEnabled: z.boolean(),
+    }),
   }),
 });
 

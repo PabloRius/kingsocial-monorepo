@@ -42,6 +42,10 @@ model User {
   socialLinks             SocialLink[]
   coverImage              String?
 
+  kNumber                 String?
+  degree                  String?
+  studyLevel              String?
+
   bookmarkedProducts      String[]          @default([])
 
   chats                   ChatParticipant[]

@@ -12,6 +12,17 @@ export const profileSelect = {
   createdAt: true,
   bookmarkedProducts: true,
   settings: true,
+  kNumber: true,
+  degree: true,
+  studyLevel: true,
+  _count: { select: { communities: true } },
+  communities: {
+    select: {
+      community: { select: { id: true, coverImage: true, name: true } },
+      role: true,
+      joinedAt: true,
+    },
+  },
 
   sellerProfile: {
     select: {
