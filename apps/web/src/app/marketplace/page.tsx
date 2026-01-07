@@ -17,7 +17,11 @@ import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useProfile } from "@/context/ProfileContext";
 import { useDebounce } from "@/hooks/useDebounce";
-import { getMarketplaceStore, toggleBookmark } from "@/services/marketplace";
+import {
+  getMarketplaceStore,
+  getRecommendedItems,
+  toggleBookmark,
+} from "@/services/marketplace";
 import {
   CATEGORIES_FILTER,
   CategoryFilter,
@@ -30,13 +34,14 @@ import {
   Plus,
   Search,
   SlidersHorizontal,
+  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 export default function MarketplacePage() {
   // Tabs
-  const [activeTab, setActiveTab] = useState<string>("featured");
+  const [activeTab, setActiveTab] = useState<string>("recommendations");
 
   // Profile state
   const { profile } = useProfile();
@@ -58,6 +63,9 @@ export default function MarketplacePage() {
   const [items, setItems] = useState<ProductDTO[] | undefined | null>(
     undefined
   );
+  const [recommendedItems, setRecommendedItems] = useState<
+    ProductDTO[] | undefined | null
+  >(undefined);
   const [page, setPage] = useState<number>(1);
   const [totalCount, setTotalCount] = useState<number>(0);
   const limit = 12;
@@ -84,6 +92,20 @@ export default function MarketplacePage() {
     };
     fetchItems();
   }, [debouncedSearchQuery, category, priceRange, condition, page, limit]);
+
+  useEffect(() => {
+    if (!profile) return;
+    const fetchRecommendedItems = async () => {
+      try {
+        const result = await getRecommendedItems();
+        console.log(result);
+        setRecommendedItems(result.data || null);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchRecommendedItems();
+  }, [profile]);
 
   // Bookmarking
   const bookmarkTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -135,7 +157,7 @@ export default function MarketplacePage() {
   const isSeller = !!profile?.sellerProfile;
 
   const itemRelations: Record<string, ProductDTO[] | undefined | null> = {
-    featured: items,
+    recommendations: recommendedItems,
     all: items,
     bookmarks: bookmarkedItems,
   };
@@ -189,41 +211,48 @@ export default function MarketplacePage() {
 
       {/* Search Bar */}
       <div className="mb-6">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-          <Input
-            type="text"
-            placeholder="Search for products"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-12 pr-4 h-14 text-lg bg-white border-blue-200 focus:border-blue-400 shadow-sm rounded-xl"
-          />
-          {searchQuery && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute right-2 top-1/2 transform -translate-y-1/2"
-              onClick={() => setSearchQuery("")}
-            >
-              <span className="sr-only">Clear search</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-gray-400"
+        {activeTab !== "recommendations" && (
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <Input
+              type="text"
+              placeholder={
+                activeTab === "recommendations"
+                  ? "Filters are disabled in recommendations"
+                  : "Search for products"
+              }
+              value={searchQuery}
+              disabled={activeTab === "recommendations"}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-12 pr-4 h-14 text-lg bg-white border-blue-200 focus:border-blue-400 shadow-sm rounded-xl"
+            />
+            {searchQuery && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2"
+                onClick={() => setSearchQuery("")}
               >
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </Button>
-          )}
-        </div>
+                <span className="sr-only">Clear search</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="text-gray-400"
+                >
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </Button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Filters Section */}
@@ -241,10 +270,10 @@ export default function MarketplacePage() {
               } sm:inline-flex`}
             >
               <TabsTrigger
-                value="featured"
+                value="recommendations"
                 className="data-[state=active]:bg-linear-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-800 data-[state=active]:text-white"
               >
-                Featured
+                Recommendations
               </TabsTrigger>
               <TabsTrigger
                 value="all"
@@ -263,84 +292,86 @@ export default function MarketplacePage() {
             </TabsList>
 
             {/* Filter Drawer */}
-            <Drawer>
-              <DrawerTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="border-blue-300 hover:bg-blue-50 w-full sm:w-auto bg-transparent"
-                >
-                  <SlidersHorizontal className="mr-2 h-4 w-4" />
-                  Filters
-                </Button>
-              </DrawerTrigger>
-              <DrawerContent>
-                <DrawerHeader>
-                  <DrawerTitle>Filter Products</DrawerTitle>
-                  <DrawerDescription>
-                    Adjust filters to find exactly what you&quot;re looking for
-                  </DrawerDescription>
-                </DrawerHeader>
-                <div className="p-4 space-y-6">
-                  {/* Category Filter */}
-                  <div>
-                    <h3 className="font-semibold mb-3 text-gray-900">
-                      Category
-                    </h3>
-                    <div className="grid grid-cols-2 gap-2">
-                      {CATEGORIES_FILTER.map((_category) => (
-                        <Button
-                          key={_category}
-                          variant={
-                            _category === category ? "default" : "outline"
-                          }
-                          onClick={() => setCategory(_category)}
-                          className={
-                            _category === category
-                              ? "bg-linear-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900"
-                              : "border-blue-200 hover:bg-blue-50"
-                          }
-                        >
-                          {_category}
-                        </Button>
-                      ))}
+            {activeTab !== "recommendations" && (
+              <Drawer>
+                <DrawerTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="border-blue-300 hover:bg-blue-50 w-full sm:w-auto bg-transparent"
+                  >
+                    <SlidersHorizontal className="mr-2 h-4 w-4" />
+                    Filters
+                  </Button>
+                </DrawerTrigger>
+                <DrawerContent>
+                  <DrawerHeader>
+                    <DrawerTitle>Filter Products</DrawerTitle>
+                    <DrawerDescription>
+                      {"Adjust filters to find exactly what you're looking for"}
+                    </DrawerDescription>
+                  </DrawerHeader>
+                  <div className="p-4 space-y-6">
+                    {/* Category Filter */}
+                    <div>
+                      <h3 className="font-semibold mb-3 text-gray-900">
+                        Category
+                      </h3>
+                      <div className="grid grid-cols-2 gap-2">
+                        {CATEGORIES_FILTER.map((_category) => (
+                          <Button
+                            key={_category}
+                            variant={
+                              _category === category ? "default" : "outline"
+                            }
+                            onClick={() => setCategory(_category)}
+                            className={
+                              _category === category
+                                ? "bg-linear-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900"
+                                : "border-blue-200 hover:bg-blue-50"
+                            }
+                          >
+                            {_category}
+                          </Button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Price Range */}
-                  <div>
-                    <h3 className="font-semibold mb-3 text-gray-900">
-                      Price Range
-                    </h3>
-                    <div className="space-y-4">
-                      <Slider
-                        value={priceRange}
-                        onValueChange={setPriceRange}
-                        max={1000}
-                        step={10}
-                        className="w-full"
-                      />
-                      <div className="flex items-center justify-between text-sm text-gray-600">
-                        <span>${priceRange[0]}</span>
-                        <span>${priceRange[1]}</span>
+                    {/* Price Range */}
+                    <div>
+                      <h3 className="font-semibold mb-3 text-gray-900">
+                        Price Range
+                      </h3>
+                      <div className="space-y-4">
+                        <Slider
+                          value={priceRange}
+                          onValueChange={setPriceRange}
+                          max={1000}
+                          step={10}
+                          className="w-full"
+                        />
+                        <div className="flex items-center justify-between text-sm text-gray-600">
+                          <span>${priceRange[0]}</span>
+                          <span>${priceRange[1]}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                <DrawerFooter>
-                  <DrawerClose asChild>
-                    <Button className="bg-linear-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900">
-                      Apply Filters
-                    </Button>
-                  </DrawerClose>
-                </DrawerFooter>
-              </DrawerContent>
-            </Drawer>
+                  <DrawerFooter>
+                    <DrawerClose asChild>
+                      <Button className="bg-linear-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900">
+                        Apply Filters
+                      </Button>
+                    </DrawerClose>
+                  </DrawerFooter>
+                </DrawerContent>
+              </Drawer>
+            )}
           </div>
 
           {Object.keys(itemRelations).map((tab) => (
             <TabsContent value={tab} key={tab}>
               {/* Search Results Info */}
-              {searchQuery && (
+              {searchQuery && activeTab !== "recommendations" && (
                 <div className="mb-4 text-sm text-gray-600">
                   Found{" "}
                   <span className="font-semibold text-blue-600">
@@ -370,19 +401,32 @@ export default function MarketplacePage() {
                   <Loader2 className="animate-spin" />
                 </div>
               ) : (
-                <div className="flex-1  items-center text-center py-12">
+                <div className="flex-1 items-center text-center py-12">
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 mb-4">
-                    <Search className="h-8 w-8 text-blue-600" />
+                    {tab === "recommendations" ? (
+                      <Sparkles className="h-8 w-8 text-blue-600" />
+                    ) : (
+                      <Search className="h-8 w-8 text-blue-600" />
+                    )}
                   </div>
+
                   <h3 className="text-xl font-semibold mb-2">
-                    No products found
+                    {tab === "recommendations"
+                      ? "No recommendations yet"
+                      : "No products found"}
                   </h3>
+
                   <p className="text-gray-600 mb-4">
-                    Try adjusting your search or filters
+                    {tab === "recommendations"
+                      ? "Try joining more communities or updating your profile interests so our AI can find the perfect items for you!"
+                      : "Try adjusting your search or filters"}
                   </p>
-                  <Button variant="outline" onClick={resetQuery}>
-                    Clear all filters
-                  </Button>
+
+                  {tab !== "recommendations" && (
+                    <Button variant="outline" onClick={resetQuery}>
+                      Clear all filters
+                    </Button>
+                  )}
                 </div>
               )}
 

@@ -44,6 +44,18 @@ router.get(
 );
 
 router.get(
+  "/recommendations",
+  Middleware.authenticate,
+  Utils.asyncHandler(async (req: Request, res: Response) => {
+    const userId = (req as any).user.id;
+
+    const result = await ItemService.getRecommendedItemsForUser(userId);
+
+    res.json({ success: true, data: result });
+  })
+);
+
+router.get(
   "/user/:userId",
   Utils.asyncHandler(async (req: Request, res: Response) => {
     const { userId } = req.params;

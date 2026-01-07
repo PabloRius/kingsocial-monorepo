@@ -138,6 +138,8 @@ model Product {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   soldAt          DateTime?
+
+  embedding       Json?
 }
 
 model Message {

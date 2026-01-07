@@ -1,3 +1,4 @@
+import { generateVector } from "@repo/ai-system";
 import { Errors } from "@repo/backend-utils";
 import { prisma } from "@repo/database";
 import { ProductDTO, ProductUpdatePayload } from "@repo/shared-types";
@@ -7,9 +8,17 @@ export async function updateItem(
   itemId: string,
   data: ProductUpdatePayload
 ): Promise<ProductDTO> {
+  const embeddingText = `Product: ${data.name}. Category: ${
+    data.category
+  }. Condition: ${data.condition}. Description: ${
+    data.description
+  }. Tags: ${data.tags?.join(", ")}. Location: ${data.pickupLocation}.`
+    .replace(/|s+/g, " ")
+    .trim();
+  const updatedEmbedding = await generateVector(embeddingText);
   return await prisma.product.update({
     where: { id: itemId },
-    data,
+    data: { ...data, embedding: updatedEmbedding },
     select: marketplaceProductSelect,
   });
 }

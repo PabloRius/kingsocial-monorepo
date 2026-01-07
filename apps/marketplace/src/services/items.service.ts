@@ -27,6 +27,10 @@ export async function getUserInventory(userId: string) {
   return await ItemStore.getByUserId(userId);
 }
 
+export async function getRecommendedItemsForUser(userId: string) {
+  return await ItemStore.getRecommendedItems(userId);
+}
+
 export async function publishItem(userId: string, data: ProductCreatePayload) {
   const user = await prisma.user.findUnique({
     where: { id: userId },

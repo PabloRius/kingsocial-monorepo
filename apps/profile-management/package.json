@@ -3,14 +3,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "dotenv -e .env -- tsx watch src/server.ts",
     "build": "tsc --noEmit"
   },
   "dependencies": {
+    "@repo/ai-system": "workspace:*",
+    "@repo/backend-utils": "workspace:*",
     "@repo/database": "workspace:*",
     "@repo/shared-types": "workspace:*",
-    "@repo/backend-utils": "workspace:*",
     "@types/express": "^5.0.6",
+    "dotenv": "^17.2.3",
     "express": "^4.22.1",
     "zod": "^4.2.1"
   },

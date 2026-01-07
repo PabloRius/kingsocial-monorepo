@@ -184,7 +184,7 @@ export const ItemCard = (props: ItemCardProps) => {
                 <div className="flex flex-col gap-1">
                   <div className="flex items-center gap-1.5 text-xs text-gray-500">
                     <Calendar className="h-3.5 w-3.5" />
-                    <span>Posted {formatDate(item.createdAt)}</span>
+                    <span>Posted {formatDate(new Date(item.createdAt))}</span>
                   </div>
 
                   {/* Show Sold Date only in Dashboard mode if it exists */}

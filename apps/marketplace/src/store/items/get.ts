@@ -108,3 +108,68 @@ export async function getByUserId(userId: string): Promise<ProductDTO[]> {
 
   return products as unknown as ProductDTO[];
 }
+
+export async function getRecommendedItems(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      embedding: true,
+      id: true,
+      sellerProfile: { select: { id: true } },
+    },
+  });
+
+  if (!user?.embedding) return [];
+
+  const sellerProfileId = user.sellerProfile?.id;
+
+  const results = (await prisma.$runCommandRaw({
+    aggregate: "Product",
+    pipeline: [
+      {
+        $vectorSearch: {
+          index: "vector_index",
+          path: "embedding",
+          queryVector: user.embedding,
+          numCandidates: 100,
+          limit: 40,
+        },
+      },
+      {
+        $match: {
+          status: { $ne: "sold" },
+          ...(sellerProfileId && {
+            sellerId: { $ne: { $oid: sellerProfileId } },
+          }),
+        },
+      },
+      { $limit: 6 },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          description: 1,
+          price: 1,
+          photos: 1,
+          category: 1,
+          condition: 1,
+          status: 1,
+          createdAt: 1,
+          sellerId: 1,
+          pickupLocation: 1,
+          score: { $meta: "vectorSearchScore" },
+        },
+      },
+    ],
+    cursor: {},
+  })) as any;
+
+  const rawProducts = results.cursor?.firstBatch || [];
+
+  return rawProducts.map((p: any) => ({
+    ...p,
+    id: p._id.$oid || p._id?.toString(),
+    createdAt: p.createdAt?.$date ? new Date(p.createdAt.$date) : p.createdAt,
+    _id: undefined,
+  }));
+}

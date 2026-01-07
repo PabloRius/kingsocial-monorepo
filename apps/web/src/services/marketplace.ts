@@ -76,6 +76,33 @@ export async function getOwnMarketplaceStore() {
   return result;
 }
 
+export async function getRecommendedItems() {
+  const url = new URL(`${baseURL}/items/recommendations`);
+
+  const session = await auth();
+
+  if (!session?.sessionToken) {
+    throw new Error("Unauthorised: No session token found");
+  }
+
+  const response = await fetch(url.toString(), {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${session.sessionToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    console.error("Error fetching items: ", response);
+    throw new Error("Failed to fetch items");
+  }
+
+  const result: ApiResponse<ProductDTO[]> = await response.json();
+
+  return result;
+}
+
 export async function createItem(
   data: ProductCreatePayload,
   files: Array<File>

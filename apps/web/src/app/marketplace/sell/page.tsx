@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { UnauthorizedPage } from "@/components/UnauthorisedCard";
+import { useProfile } from "@/context/ProfileContext";
 import { createItem, getItemById } from "@/services/marketplace";
 import {
   CATEGORIES_CORE,
@@ -33,12 +34,14 @@ import {
   Loader2,
   Plus,
   PoundSterling,
+  ShoppingBag,
   Tag,
   Upload,
   X,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -49,6 +52,7 @@ function SellPageContent() {
   // Session state
   const { status } = useSession();
   const router = useRouter();
+  const { profile } = useProfile();
   // Form data
   const [formData, setFormData] = useState<ProductCreatePayload>({
     name: "",
@@ -222,9 +226,57 @@ function SellPageContent() {
     fetchProductData();
   }, [resellId]);
 
+  if (status === "loading" || profile === undefined) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-slate-50/50">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
   // Session check
   if (status === "unauthenticated") {
     return <UnauthorizedPage />;
+  }
+
+  if (!profile?.sellerProfile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6 bg-linear-to-br from-blue-50 via-white to-purple-50">
+        <Card className="max-w-md w-full border-none shadow-2xl rounded-3xl overflow-hidden bg-white">
+          <div className="h-2 bg-amber-500" />
+          <CardContent className="p-10 text-center">
+            <div className="mx-auto w-20 h-20 bg-amber-50 rounded-2xl flex items-center justify-center mb-6">
+              <ShoppingBag className="h-10 w-10 text-amber-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-slate-900 mb-3">
+              Seller Account Required
+            </h2>
+            <p className="text-slate-500 mb-8 leading-relaxed">
+              To list items on the marketplace, you need to set up a seller
+              profile first. It only takes a minute to choose a plan and start
+              selling.
+            </p>
+            <div className="flex flex-col gap-3">
+              <Button
+                asChild
+                className="w-full h-12 rounded-xl bg-blue-600 shadow-lg shadow-blue-200 font-bold"
+              >
+                <Link href="/marketplace/select-plan">
+                  Setup Seller Profile
+                </Link>
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => router.back()}
+                className="text-slate-400 font-medium"
+              >
+                Go Back
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
@@ -546,16 +598,10 @@ function SellPageContent() {
             <div className="flex gap-4">
               <Button
                 type="submit"
-                disabled={isSubmitting || status === "loading"}
+                disabled={isSubmitting}
                 className="flex-1 bg-linear-to-r from-celestial-blue-500 to-picton-blue-500 hover:from-celestial-blue-600 hover:to-picton-blue-600 text-white"
               >
-                {status === "loading" ? (
-                  <Loader2 className="animate-spin" />
-                ) : isSubmitting ? (
-                  "Publishing..."
-                ) : (
-                  "Publish Listing"
-                )}
+                {isSubmitting ? "Publishing..." : "Publish Listing"}
               </Button>
             </div>
           </form>

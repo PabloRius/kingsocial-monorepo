@@ -11,6 +11,7 @@ export function formatCount(
 
 export function formatDate(date: Date) {
   // Format a date into a card-friendly format
+  console.log(typeof date);
   return new Date(date).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",

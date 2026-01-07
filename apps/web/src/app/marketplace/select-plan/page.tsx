@@ -10,10 +10,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useProfile } from "@/context/ProfileContext";
 import { activatePlan } from "@/services/marketplace";
-import { getOwnProfile } from "@/services/profile";
 import { plans } from "@/static/data";
-import { ProfileDTO, SellerPlan } from "@repo/shared-types";
+import { SellerPlan } from "@repo/shared-types";
 import {
   Check,
   Loader2,
@@ -23,31 +23,18 @@ import {
   Users,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 
 export default function SelectPlanPage() {
-  const [profile, setProfile] = useState<ProfileDTO | undefined | null>(
-    undefined
-  );
+  const { profile, refreshProfile } = useProfile();
   const router = useRouter();
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const result = await getOwnProfile();
-        setProfile(result.data);
-      } catch (error) {
-        console.error(error);
-        setProfile(null);
-      }
-    };
-    fetchProfile();
-  }, []);
 
   const handleActivatePlan = async (id: SellerPlan) => {
     try {
       const result = await activatePlan(id);
-      if (result.success) router.push("/marketplace/your-listings");
+      if (result.success) {
+        router.push("/marketplace/your-listings");
+        refreshProfile();
+      }
     } catch (error) {
       console.error(error);
     }
