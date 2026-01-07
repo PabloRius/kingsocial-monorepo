@@ -6,7 +6,8 @@
     "paths": {
       "@repo/shared-types": ["../../packages/shared-types/src/index.ts"],
       "@repo/database": ["../../packages/database/src/index.ts"],
-      "@repo/backend-utils": ["../../packages/backend-utils/src/index.ts"]
+      "@repo/backend-utils": ["../../packages/backend-utils/src/index.ts"],
+      "@repo/ai-system": ["../../packages/ai-system/src/index.ts"]
     }
   },
   "include": ["src"]

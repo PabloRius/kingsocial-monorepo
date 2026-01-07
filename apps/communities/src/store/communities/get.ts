@@ -78,6 +78,68 @@ export async function getById(
   return community;
 }
 
+export async function getRecommendedCommunities(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      embedding: true,
+      id: true,
+      communities: { select: { communityId: true } },
+    },
+  });
+
+  if (!user?.embedding) return [];
+
+  const joinedCommunityIds = user.communities.map((c) => c.communityId);
+
+  const results = (await prisma.$runCommandRaw({
+    aggregate: "Community",
+    pipeline: [
+      {
+        $vectorSearch: {
+          index: "vector_index",
+          path: "embedding",
+          queryVector: user.embedding,
+          numCandidates: 100,
+          limit: 40,
+        },
+      },
+      {
+        $match: {
+          ...(joinedCommunityIds.length > 0 && {
+            _id: {
+              $nin: joinedCommunityIds.map((id) => ({ $oid: id })),
+            },
+          }),
+        },
+      },
+      { $limit: 6 },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          description: 1,
+          coverImage: 1,
+          mode: 1,
+          createdAt: 1,
+          creatorId: 1,
+          score: { $meta: "vectorSearchScore" },
+        },
+      },
+    ],
+    cursor: {},
+  })) as any;
+
+  const rawCommunities = results.cursor?.firstBatch || [];
+
+  return rawCommunities.map((p: any) => ({
+    ...p,
+    id: p._id.$oid || p._id?.toString(),
+    createdAt: p.createdAt?.$date ? new Date(p.createdAt.$date) : p.createdAt,
+    _id: undefined,
+  }));
+}
+
 export async function hasRequested(
   communityId: string,
   userId: string

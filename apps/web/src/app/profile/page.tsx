@@ -147,7 +147,6 @@ export default function OwnProfilePage() {
       if (!res) {
         throw new Error("Failed to save profile");
       }
-
       setIsEditing(false);
       refreshProfile();
     } catch (err) {

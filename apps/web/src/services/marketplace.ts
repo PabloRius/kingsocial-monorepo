@@ -9,6 +9,7 @@ import {
   ProductDTO,
 } from "@repo/shared-types";
 import { deleteFromCloudinary, uploadToCloudinary } from "./cloudinary-utils";
+import { updateOwnEmbeddings } from "./profile";
 
 const baseURL = `${process.env.NEXT_PUBLIC_MARKETPLACE_URL}`;
 
@@ -290,7 +291,13 @@ export async function toggleBookmark(itemId: string) {
 
   const result: ApiResponse<null> = await response.json();
 
-  return result;
+  try {
+    await updateOwnEmbeddings();
+  } catch (error) {
+    console.error("Error updating self embeddings: ", error);
+  } finally {
+    return result;
+  }
 }
 
 export async function increaseViews(itemId: string) {

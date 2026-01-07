@@ -10,6 +10,7 @@ import {
   CommunityUpdatePayload,
 } from "@repo/shared-types";
 import { deleteFromCloudinary, uploadToCloudinary } from "./cloudinary-utils";
+import { updateOwnEmbeddings } from "./profile";
 
 const baseURL = `${process.env.NEXT_PUBLIC_COMMUNITIES_URL}/communities`;
 
@@ -85,6 +86,33 @@ export async function getCommunityById(communityId: string) {
   return result;
 }
 
+export async function getRecommendedCommunities() {
+  const url = new URL(`${baseURL}/recommendations`);
+
+  const session = await auth();
+
+  if (!session?.sessionToken) {
+    throw new Error("Unauthorised: No session token found");
+  }
+
+  const response = await fetch(url.toString(), {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${session.sessionToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    console.error("Error fetching communities: ", response);
+    throw new Error("Failed to fetch communities");
+  }
+
+  const result: ApiResponse<CommunityDTO[]> = await response.json();
+
+  return result;
+}
+
 export async function joinCommunity(communityId: string) {
   const session = await auth();
 
@@ -106,7 +134,13 @@ export async function joinCommunity(communityId: string) {
 
   const result: ApiResponse<CommunityDTO> = await response.json();
 
-  return result;
+  try {
+    await updateOwnEmbeddings();
+  } catch (error) {
+    console.error("Error updating self embeddings: ", error);
+  } finally {
+    return result;
+  }
 }
 
 export async function stampCommunityJoinRequest(
@@ -207,7 +241,13 @@ export async function createCommunity(
 
     const result: ApiResponse<CommunityDTO> = await response.json();
 
-    return result;
+    try {
+      await updateOwnEmbeddings();
+    } catch (error) {
+      console.error("Error updating self embeddings: ", error);
+    } finally {
+      return result;
+    }
   } catch (error) {
     if (uploadedUrl) {
       try {

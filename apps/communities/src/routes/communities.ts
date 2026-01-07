@@ -31,6 +31,20 @@ router.get(
 );
 
 router.get(
+  "/recommendations",
+  Middleware.authenticate,
+  Utils.asyncHandler(async (req: Request, res: Response) => {
+    const userId = (req as any).user.id;
+
+    const result = await CommunitiesService.getRecommendedCommunitiesforUser(
+      userId
+    );
+
+    res.json({ success: true, data: result });
+  })
+);
+
+router.get(
   "/:communityId",
   Middleware.authenticate,
   Utils.asyncHandler(async (req: Request, res: Response) => {

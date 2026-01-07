@@ -1,3 +1,4 @@
+import { generateVector } from "@repo/ai-system";
 import { prisma } from "@repo/database";
 import { CommunityCreatePayload, CommunityDTO } from "@repo/shared-types";
 import { communitySelect } from "./get";
@@ -6,6 +7,11 @@ export async function createCommunity(
   data: CommunityCreatePayload,
   creatorId: string
 ): Promise<CommunityDTO> {
+  const embeddingText =
+    `Community data: Commuinty name: ${data.name}. Community Description: ${data.description}.`
+      .replace(/|s+/g, " ")
+      .trim();
+  const embedding = await generateVector(embeddingText);
   return await prisma.community.create({
     data: {
       ...data,
@@ -17,6 +23,7 @@ export async function createCommunity(
           role: "admin",
         },
       },
+      embedding,
     },
     select: communitySelect,
   });

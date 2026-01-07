@@ -7,6 +7,16 @@ export async function updateProfile(
   userId: string,
   data: ProfileUpdatePayload
 ): Promise<ProfileDTO> {
+  const result = await prisma.user.update({
+    where: { id: userId },
+    data,
+    select: profileSelect,
+  });
+
+  return result;
+}
+
+export async function updateUserEmbeddings(userId: string) {
   const userData = await prisma.user.findUnique({
     where: { id: userId },
     select: {
@@ -14,11 +24,13 @@ export async function updateProfile(
       biography: true,
       degree: true,
       studyLevel: true,
+      socialLinks: true,
       communities: {
         select: { community: { select: { name: true, description: true } } },
       },
     },
   });
+  if (!userData) throw new Error("User doesn't exist");
   const bookmarks = await prisma.product.findMany({
     where: { id: { in: userData?.bookmarkedProducts || [] } },
     select: { name: true, category: true },
@@ -29,12 +41,14 @@ export async function updateProfile(
   const communityText = userData?.communities
     .map((c) => c.community.name)
     .join(", ");
-  const socialText = data.socialLinks?.map((s) => s.platform).join(", ");
+  const socialText = userData.socialLinks?.map((s) => s.platform).join(", ");
   const embeddingText = `
     User Persona and Interests.
-    Biography: ${data.biography}.
+    Biography: ${userData.biography}.
     ${
-      data.degree ? `Studying: ${data.degree} at ${data.studyLevel} level.` : ""
+      userData.degree
+        ? `Studying: ${userData.degree} at ${userData.studyLevel} level.`
+        : ""
     }
     ${socialText ? `Active on: ${socialText}.` : ""}
     ${communityText ? `Member of these groups: ${communityText}.` : ""}
@@ -45,7 +59,7 @@ export async function updateProfile(
   const embedding = await generateVector(embeddingText);
   const result = await prisma.user.update({
     where: { id: userId },
-    data: { ...data, embedding },
+    data: { embedding },
     select: profileSelect,
   });
 

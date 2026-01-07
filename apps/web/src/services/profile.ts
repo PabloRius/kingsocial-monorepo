@@ -116,7 +116,14 @@ export async function updateProfile(
       );
     }
 
-    return await response.json();
+    const result = await response.json();
+    try {
+      await updateOwnEmbeddings();
+    } catch (error) {
+      console.error("Error updating self embeddings: ", error);
+    } finally {
+      return result;
+    }
   } catch {
     if (uploadedUrls.length === 0) return;
     try {
@@ -127,6 +134,31 @@ export async function updateProfile(
       console.error("Cleanup failed", e);
     }
   }
+}
+
+export async function updateOwnEmbeddings() {
+  const session = await auth();
+
+  if (!session?.sessionToken) {
+    throw new Error("Unauthorised: No session token found");
+  }
+
+  const response = await fetch(`${baseURL}/profile/embeddings`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${session.sessionToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    console.error("Failed to update profile", response);
+    throw new Error("Failed to update profile");
+  }
+
+  const result: ApiResponse<ProfileDTO> = await response.json();
+
+  return result;
 }
 
 async function performCleanup(items: { url: string; folder: string }[]) {

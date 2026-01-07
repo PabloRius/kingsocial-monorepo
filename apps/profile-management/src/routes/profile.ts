@@ -42,4 +42,17 @@ router.put(
   })
 );
 
+router.put(
+  "/embeddings",
+  Middleware.authenticate,
+  Middleware.validate(ProfileUpdateSchema),
+  Utils.asyncHandler(async (req: Request, res: Response) => {
+    const userId = (req as any).user.id;
+
+    const result = await ProfileService.updateUserEmbeddings(userId);
+
+    res.json({ success: true, data: result });
+  })
+);
+
 export default router;

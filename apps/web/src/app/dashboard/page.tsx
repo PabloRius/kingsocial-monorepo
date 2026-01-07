@@ -9,10 +9,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useProfile } from "@/context/ProfileContext"; // Use your new context!
 import { formatCount } from "@/lib/formatters";
-import { getAllCommunities } from "@/services/communities";
+import {
+  getAllCommunities,
+  getRecommendedCommunities,
+} from "@/services/communities";
 import { getAllEvents } from "@/services/event";
 import { getMarketplaceStore } from "@/services/marketplace";
-import { EventDTO } from "@repo/shared-types";
+import { CommunityDTO, EventDTO } from "@repo/shared-types";
 import {
   ArrowRight,
   Loader2,
@@ -22,6 +25,7 @@ import {
   Users,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -31,6 +35,9 @@ export default function DashboardPage() {
   const [marketplaceCount, setMarketplaceCount] = useState<number | null>(null);
   const [communitiesCount, setCommunitiesCount] = useState<number | null>(null);
   const [events, setEvents] = useState<EventDTO[] | undefined>(undefined);
+  const [recommendedCommunities, setRecommendedCommunities] = useState<
+    CommunityDTO[] | undefined | null
+  >(undefined);
 
   useEffect(() => {
     if (status !== "authenticated") return;
@@ -46,6 +53,21 @@ export default function DashboardPage() {
         setEvents(events.data || []);
       } catch (error) {
         console.error(error);
+      }
+    };
+    fetchData();
+  }, [status]);
+
+  useEffect(() => {
+    if (status !== "authenticated") return;
+
+    const fetchData = async () => {
+      try {
+        const result = await getRecommendedCommunities();
+        setRecommendedCommunities(result.data || null);
+      } catch (error) {
+        console.error(error);
+        setRecommendedCommunities(null);
       }
     };
     fetchData();
@@ -166,24 +188,72 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* ADDED: YOUR ACTIVITY SECTION */}
           <div className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900">
-                Recent Communities
-              </h3>
-              <Button variant="link" className="text-blue-600">
-                View All
-              </Button>
+              <div className="flex items-center gap-2">
+                <div className="p-2 bg-blue-50 rounded-lg">
+                  <Sparkles className="h-5 w-5 text-blue-600" />
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">
+                  New Communities for You
+                </h3>
+              </div>
+              <Link href="/communities">
+                <Button variant="link" className="text-blue-600 font-semibold">
+                  Explore Hub
+                </Button>
+              </Link>
             </div>
-            {/* Placeholder for actual data list */}
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[1, 2, 3, 4].map((i) => (
-                <div
-                  key={i}
-                  className="aspect-square rounded-2xl bg-slate-100 animate-pulse"
-                />
-              ))}
+              {recommendedCommunities === undefined ? (
+                // Loading State (Your pulse animation)
+                [1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    className="aspect-square rounded-2xl bg-slate-50 animate-pulse border border-slate-100"
+                  />
+                ))
+              ) : recommendedCommunities &&
+                recommendedCommunities.length > 0 ? (
+                recommendedCommunities.slice(0, 4).map((comm) => (
+                  <Link
+                    href={`/communities/${comm.id}`}
+                    key={comm.id}
+                    className="group"
+                  >
+                    <div className="aspect-square relative rounded-2xl overflow-hidden border border-gray-100 shadow-sm transition-all hover:shadow-md hover:-translate-y-1">
+                      {/* Cover Image */}
+                      <Image
+                        src={comm.coverImage || "/community-placeholder.png"}
+                        alt={comm.name}
+                        fill
+                        className="object-cover transition-transform group-hover:scale-105"
+                      />
+                      {/* Overlay Gradient */}
+                      <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
+
+                      {/* Content */}
+                      <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                        <p className="text-xs font-medium text-blue-300 mb-1 uppercase tracking-wider">
+                          {comm.mode || "Public"}
+                        </p>
+                        <h4 className="font-bold text-sm md:text-base leading-tight line-clamp-2">
+                          {comm.name}
+                        </h4>
+                      </div>
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                // Empty State
+                <div className="col-span-full py-10 flex flex-col items-center justify-center border-2 border-dashed border-slate-100 rounded-3xl bg-slate-50/50">
+                  <Users className="h-8 w-8 text-slate-300 mb-2" />
+                  <p className="text-slate-500 text-sm">
+                    Join more groups to see better matches!
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -20,3 +20,7 @@ export async function updateProfile(
 ) {
   return await ProfileStore.updateProfile(userId, data);
 }
+
+export async function updateUserEmbeddings(userId: string) {
+  return await ProfileStore.updateUserEmbeddings(userId);
+}

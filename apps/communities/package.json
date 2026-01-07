@@ -3,10 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/server.ts",
+    "dev": "dotenv -e .env -- tsx watch src/server.ts",
     "build": "tsc --noEmit"
   },
   "dependencies": {
+    "@repo/ai-system": "workspace:*",
     "@repo/backend-utils": "workspace:*",
     "@repo/database": "workspace:*",
     "@repo/shared-types": "workspace:*",

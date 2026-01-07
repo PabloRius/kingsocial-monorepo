@@ -28,6 +28,10 @@ export async function getCommunityById(communityId: string) {
   return data;
 }
 
+export async function getRecommendedCommunitiesforUser(userId: string) {
+  return await CommunitiesStore.getRecommendedCommunities(userId);
+}
+
 export async function hasRequestedToJoin(communityId: string, userId: string) {
   const data = await CommunitiesStore.hasRequested(communityId, userId);
 
