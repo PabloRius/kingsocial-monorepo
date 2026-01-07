@@ -18,6 +18,18 @@ router.get(
 );
 
 router.get(
+  "/recommendations",
+  Middleware.authenticate,
+  Utils.asyncHandler(async (req: Request, res: Response) => {
+    const userId = (req as any).user.id;
+
+    const result = await ProfileService.getRecommendedPeers(userId);
+
+    res.json({ success: true, data: result });
+  })
+);
+
+router.get(
   "/:userId",
   Middleware.authenticate,
   Utils.asyncHandler(async (req: Request, res: Response) => {
@@ -45,7 +57,6 @@ router.put(
 router.put(
   "/embeddings",
   Middleware.authenticate,
-  Middleware.validate(ProfileUpdateSchema),
   Utils.asyncHandler(async (req: Request, res: Response) => {
     const userId = (req as any).user.id;
 

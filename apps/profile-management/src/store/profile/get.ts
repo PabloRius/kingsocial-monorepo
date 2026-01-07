@@ -65,3 +65,51 @@ export async function getById(id: string): Promise<ProfileDTO | null> {
 
   return profile as ProfileDTO | null;
 }
+
+export async function getRecommendedPeers(userId: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { embedding: true },
+  });
+
+  if (!user?.embedding) return [];
+
+  const results = (await prisma.$runCommandRaw({
+    aggregate: "User",
+    pipeline: [
+      {
+        $vectorSearch: {
+          index: "vector_index",
+          path: "embedding",
+          queryVector: user.embedding,
+          numCandidates: 50,
+          limit: 10,
+        },
+      },
+      {
+        $match: {
+          _id: { $ne: { $oid: userId } },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          biography: 1,
+          degree: 1,
+          studyLevel: 1,
+          image: 1,
+          score: { $meta: "vectorSearchScore" },
+        },
+      },
+    ],
+    cursor: {},
+  })) as any;
+
+  const rawPeers = results.cursor?.firstBatch || [];
+
+  return rawPeers.map((p: any) => ({
+    ...p,
+    id: p._id.$oid || p._id?.toString(),
+  }));
+}

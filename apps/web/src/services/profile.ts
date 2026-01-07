@@ -60,6 +60,33 @@ export async function getProfileById(userId: string) {
   return result;
 }
 
+export async function getRecommendedPeers() {
+  const url = new URL(`${baseURL}/profile/recommendations`);
+
+  const session = await auth();
+
+  if (!session?.sessionToken) {
+    throw new Error("Unauthorised: No session token found");
+  }
+
+  const response = await fetch(url.toString(), {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${session.sessionToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    console.error("Error fetching peers: ", response);
+    throw new Error("Failed to fetch peers");
+  }
+
+  const result: ApiResponse<ProfileDTO[]> = await response.json();
+
+  return result;
+}
+
 export async function updateProfile(
   data: ProfileUpdatePayload,
   imageFile?: File,

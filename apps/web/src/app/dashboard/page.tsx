@@ -22,6 +22,7 @@ import {
   ShoppingBag,
   Sparkles,
   TrendingUp,
+  UserPlus,
   Users,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -101,6 +102,16 @@ export default function DashboardPage() {
       href: "/communities",
       stats: formatCount(communitiesCount, "community", "communities"),
       lightBg: "bg-purple-50",
+    },
+    {
+      id: "agenda",
+      title: "Agenda",
+      description: "Connect with students sharing your interests or degree.",
+      icon: UserPlus,
+      gradient: "from-amber-500 via-orange-500 to-yellow-400",
+      href: "/agenda",
+      stats: "Find Peers",
+      lightBg: "bg-amber-50",
     },
   ];
 

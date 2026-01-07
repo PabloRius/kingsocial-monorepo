@@ -14,6 +14,10 @@ export async function getOwnProfile(authenticatedUserId: string) {
   return await getPublicProfile(authenticatedUserId);
 }
 
+export async function getRecommendedPeers(userId: string) {
+  return await ProfileStore.getRecommendedPeers(userId);
+}
+
 export async function updateProfile(
   userId: string,
   data: ProfileUpdatePayload
