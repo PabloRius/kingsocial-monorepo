@@ -147,11 +147,8 @@ export async function deleteCommunityById(communityId: string, userId: string) {
 
   if (!community) throw new Errors.APIError("Community doesn't exist", 404);
 
-  if (
-    community?.creatorId !== userId &&
-    !community?.members.some((m) => m.userId === userId && m.role === "admin")
-  )
-    throw new Errors.APIError("Only the admins can delete the community", 403);
+  if (community?.creatorId !== userId)
+    throw new Errors.APIError("Only the creator can delete the community", 403);
 
   return await CommunitiesStore.deleteById(communityId);
 }
