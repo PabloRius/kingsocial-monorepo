@@ -97,7 +97,7 @@ export default function InboxPage() {
     );
 
   const otherParticipant = selectedChatData.participants.find(
-    (p) => p.user.id !== profile.id
+    (p) => p.user?.id !== profile.id
   );
 
   return (
@@ -122,8 +122,8 @@ export default function InboxPage() {
                 >
                   <Avatar className="transition-all duration-300 ease-in-out group-hover:scale-110 group-hover:ring-2 group-hover:ring-blue-500 group-hover:ring-offset-2 ring-offset-white shadow-sm">
                     <AvatarImage
-                      src={otherParticipant?.user.image || "/placeholder.png"}
-                      alt={otherParticipant?.user.name}
+                      src={otherParticipant?.user?.image || "/placeholder.png"}
+                      alt={otherParticipant?.user?.name}
                       className="object-cover"
                     />
                   </Avatar>
@@ -142,7 +142,7 @@ export default function InboxPage() {
               </div>
               <div>
                 <h2 className="font-semibold text-gray-900">
-                  {otherParticipant?.user.name}
+                  {otherParticipant?.user?.name}
                 </h2>
                 {/* <p className="text-xs text-gray-500">
                     {selectedChatData?.online ? "Active now" : "Offline"}

@@ -21,8 +21,8 @@ export function ChatSidebar() {
 
   const filteredChats = chats?.filter((chat) => {
     const otherParticipantsNames = chat.participants
-      .filter((p) => p.user.id !== profile?.id)
-      .map((p) => p.user.name?.toLowerCase() || "")
+      .filter((p) => p.user?.id !== profile?.id)
+      .map((p) => p.user?.name?.toLowerCase() || "")
       .join(" ");
 
     const lastMessageContent =
@@ -64,7 +64,7 @@ export function ChatSidebar() {
         ) : (
           filteredChats.map((chat) => {
             const otherParticipant = chat.participants.find(
-              (p) => p.user.id !== profile.id
+              (p) => p.user?.id !== profile.id
             );
             const count = unreadTotals[chat.id] || 0;
             return (
@@ -86,14 +86,14 @@ export function ChatSidebar() {
                       src={
                         // chat.avatar ||
 
-                        otherParticipant?.user.image || "/placeholder.svg"
+                        otherParticipant?.user?.image || "/placeholder.svg"
                       }
                       alt={
                         // chat.avatar
                         //   ? "Chat Avatar"
                         chat.participants
-                          .filter((p) => p.user.id !== profile.id)
-                          .map((p) => p.user.name)
+                          .filter((p) => p.user?.id !== profile.id)
+                          .map((p) => p.user?.name)
                           .join(", ")
                       }
                     />
@@ -112,8 +112,8 @@ export function ChatSidebar() {
                   <div className="flex items-center justify-between mb-1">
                     <h3 className="font-semibold text-gray-900 truncate">
                       {chat.participants
-                        .filter((p) => p.user.id !== profile.id)
-                        .map((p) => p.user.name)
+                        .filter((p) => p.user?.id !== profile.id)
+                        .map((p) => p.user?.name)
                         .join(", ")}
                     </h3>
                     <span className="text-xs text-gray-500 shrink-0">
@@ -133,8 +133,8 @@ export function ChatSidebar() {
 
                           const senderId = lastMessage.senderId;
                           const senderName = chat.participants.find(
-                            (p) => p.user.id === senderId
-                          )?.user.name;
+                            (p) => p.user?.id === senderId
+                          )?.user?.name;
                           const isFromLoggedUser = senderId === profile.id;
 
                           if (isFromLoggedUser) {

@@ -145,7 +145,7 @@ model Product {
 model Message {
   id            String      @id @default(auto()) @map("_id") @db.ObjectId
   chatId        String      @db.ObjectId
-  senderId      String      @db.ObjectId
+  senderId      String?     @db.ObjectId
   content       String
   createdAt     DateTime    @default(now())
   
@@ -156,18 +156,18 @@ model Message {
   eventRef      Event?      @relation(fields: [eventRefId], references: [id])
 
   chat          Chat        @relation(fields: [chatId], references: [id])
-  sender        User        @relation(fields: [senderId], references: [id])
+  sender        User?       @relation(fields: [senderId], references: [id], onDelete: SetNull)
 }
 
 model ChatParticipant {
   id     String       @id @default(auto()) @map("_id") @db.ObjectId
   chatId String       @db.ObjectId
-  userId String       @db.ObjectId
+  userId String?      @db.ObjectId
 
   lastReadAt          DateTime? @default(now())
 
   chat   Chat         @relation(fields: [chatId], references: [id])
-  user   User         @relation(fields: [userId], references: [id])
+  user   User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@unique([chatId, userId])
 }

@@ -42,7 +42,9 @@ export const chatSchema = z.object({
       chatId: z.string(),
       userId: z.string(),
       lastReadAt: z.date(),
-      user: z.object({ id: z.string(), image: z.string(), name: z.string() }),
+      user: z
+        .object({ id: z.string(), image: z.string(), name: z.string() })
+        .nullable(),
     })
   ),
 });

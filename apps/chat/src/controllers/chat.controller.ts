@@ -133,7 +133,7 @@ export async function sendMessage(req: Request, res: Response) {
   });
 
   chat?.participants.forEach((p) => {
-    if (p.userId !== senderId) {
+    if (p.userId !== senderId && p.userId) {
       io.to(p.userId).emit("receive_message", newMessage);
     }
   });
