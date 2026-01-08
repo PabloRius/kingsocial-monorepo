@@ -22,7 +22,9 @@ export async function updateProfile(
   userId: string,
   data: ProfileUpdatePayload
 ) {
-  return await ProfileStore.updateProfile(userId, data);
+  const result = await ProfileStore.updateProfile(userId, data);
+  await ProfileStore.updateUserEmbeddings(userId);
+  return result;
 }
 
 export async function updateUserEmbeddings(userId: string) {

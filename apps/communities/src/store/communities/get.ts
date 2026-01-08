@@ -78,6 +78,13 @@ export async function getById(
   return community;
 }
 
+export async function getJoinRequestById(requestId: string) {
+  return await prisma.communityJoinRequest.findUnique({
+    where: { id: requestId },
+    select: { communityId: true, userId: true },
+  });
+}
+
 export async function getRecommendedCommunities(userId: string) {
   const user = await prisma.user.findUnique({
     where: { id: userId },

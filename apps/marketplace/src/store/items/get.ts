@@ -109,6 +109,14 @@ export async function getByUserId(userId: string): Promise<ProductDTO[]> {
   return products as unknown as ProductDTO[];
 }
 
+export async function getUserBookmarkedItems(userId: string) {
+  const result = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { bookmarkedProducts: true },
+  });
+  return result?.bookmarkedProducts;
+}
+
 export async function getRecommendedItems(userId: string) {
   const user = await prisma.user.findUnique({
     where: { id: userId },

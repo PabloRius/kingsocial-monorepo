@@ -1,5 +1,4 @@
 import { Errors } from "@repo/backend-utils";
-import { prisma } from "@repo/database";
 import {
   CommunityCreatePayload,
   CommunityUpdatePayload,
@@ -85,9 +84,7 @@ export async function requestJoinCommunity(
 }
 
 export async function processJoinRequest(requestId: string, status: string) {
-  const requestData = await prisma.communityJoinRequest.findUnique({
-    where: { id: requestId },
-  });
+  const requestData = await CommunitiesStore.getJoinRequestById(requestId);
 
   if (!requestData)
     throw new Errors.APIError("Request not found in the server", 400);
@@ -100,11 +97,12 @@ export async function processJoinRequest(requestId: string, status: string) {
   if (!stampResult)
     throw new Errors.APIError("Error processing the join request", 500);
 
-  const { communityId, userId } = requestData;
+  if (status === "approved") {
+    const { communityId, userId } = requestData;
+    return await CommunitiesStore.joinCommunity(communityId, userId);
+  }
 
-  const result = await CommunitiesStore.joinCommunity(communityId, userId);
-
-  return result;
+  return stampResult;
 }
 
 export async function updateCommunity(

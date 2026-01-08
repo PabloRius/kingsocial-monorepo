@@ -1,11 +1,11 @@
 import { Errors } from "@repo/backend-utils";
-import { prisma } from "@repo/database";
 import {
   GetMarketplaceQuery,
   ProductCreatePayload,
   ProductUpdatePayload,
 } from "@repo/shared-types";
 import * as ItemStore from "../store/items";
+import * as PlansStore from "../store/plans";
 
 export async function getMarketplaceCatalog(query: GetMarketplaceQuery) {
   const { page, limit, userId, ...filters } = query;
@@ -32,19 +32,16 @@ export async function getRecommendedItemsForUser(userId: string) {
 }
 
 export async function publishItem(userId: string, data: ProductCreatePayload) {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { sellerProfile: { select: { id: true } } },
-  });
+  const sellerProfile = await PlansStore.getSellerProfile(userId);
 
-  if (!user?.sellerProfile) {
+  if (!sellerProfile) {
     throw new Errors.APIError(
       "Only registered sellers can publish listings",
       403
     );
   }
 
-  return await ItemStore.createItem(user.sellerProfile.id, data);
+  return await ItemStore.createItem(sellerProfile.id, data);
 }
 
 export async function modifyItemById(
@@ -52,24 +49,17 @@ export async function modifyItemById(
   itemId: string,
   data: ProductUpdatePayload
 ) {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { sellerProfile: { select: { id: true } } },
-  });
+  const sellerProfile = await PlansStore.getSellerProfile(userId);
 
-  if (!user) {
+  if (!sellerProfile) {
     throw new Errors.APIError(
-      "Only registered users can access this method",
+      "Only registered sellers can access this method",
       403
     );
   }
 
-  const item = await prisma.product.findUnique({
-    where: { id: itemId },
-    select: { seller: { select: { userId: true } } },
-  });
-
-  if (!item || item.seller?.userId !== userId) {
+  const item = await ItemStore.getById(itemId);
+  if (!item || item.seller?.id !== sellerProfile.id) {
     throw new Errors.APIError(
       "Unauthorised: You don't have access to this item",
       403
@@ -81,34 +71,15 @@ export async function modifyItemById(
 }
 
 export async function increaseItemViewsByOne(userId: string, itemId: string) {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { sellerProfile: { select: { id: true } } },
-  });
-
-  if (!user) {
-    throw new Errors.APIError(
-      "Only registered users can increase an item's views",
-      403
-    );
-  }
-
-  const result = await ItemStore.increaseViews(itemId);
-  return result;
+  return await ItemStore.increaseViews(itemId);
 }
 
 export async function markItemAsSold(userId: string, itemId: string) {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { sellerProfile: { select: { id: true } } },
-  });
+  const sellerProfile = await PlansStore.getSellerProfile(userId);
 
-  const item = await prisma.product.findUnique({
-    where: { id: itemId },
-    select: { seller: { select: { userId: true } } },
-  });
+  const item = await ItemStore.getById(itemId);
 
-  if (!user || !user.sellerProfile || item?.seller?.userId !== userId) {
+  if (!sellerProfile || item?.seller?.id !== sellerProfile.id) {
     throw new Errors.APIError(
       "Only the seller can modify an item's status",
       403
@@ -120,17 +91,11 @@ export async function markItemAsSold(userId: string, itemId: string) {
 }
 
 export async function toggleItemBookmark(userId: string, itemId: string) {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { bookmarkedProducts: true },
-  });
+  const bookmarkedProducts = await ItemStore.getUserBookmarkedItems(userId);
 
-  const item = await prisma.product.findUnique({
-    where: { id: itemId },
-    select: { seller: { select: { userId: true } } },
-  });
+  const item = await ItemStore.getById(itemId);
 
-  if (!user || !user.bookmarkedProducts || !item) {
+  if (!bookmarkedProducts || !item) {
     throw new Errors.APIError("Invalid params", 400);
   }
 
@@ -138,7 +103,7 @@ export async function toggleItemBookmark(userId: string, itemId: string) {
     throw new Errors.APIError("You cannot bookmark your own items", 400);
   }
 
-  if (user.bookmarkedProducts.includes(itemId)) {
+  if (bookmarkedProducts.includes(itemId)) {
     return await ItemStore.unBookmarkItem(userId, itemId);
   }
 
@@ -146,11 +111,7 @@ export async function toggleItemBookmark(userId: string, itemId: string) {
 }
 
 export async function deleteItemById(userId: string, itemId: string) {
-  console.log(itemId);
-  const item = await prisma.product.findUnique({
-    where: { id: itemId },
-    select: { seller: { select: { userId: true } } },
-  });
+  const item = await ItemStore.getById(itemId);
   if (!item) throw new Errors.APIError("Item not found", 404);
   if (!item.seller)
     throw new Errors.APIError("Unauthorized: You do not own this listing", 403);

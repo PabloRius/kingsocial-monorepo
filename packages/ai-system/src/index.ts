@@ -27,14 +27,7 @@ export async function generateVector(text: string): Promise<number[]> {
 
     return vector;
   } catch (error: any) {
-    // Log specifically if it's an auth error
-    if (error.httpResponse?.status === 401) {
-      console.error(
-        "❌ Hugging Face Auth Failed: Check if HF_TOKEN is valid in your .env"
-      );
-    } else {
-      console.error("Hugging Face Inference Error:", error);
-    }
-    return [];
+    console.error("Hugging Face Inference Error:", error.message);
+    throw error;
   }
 }
