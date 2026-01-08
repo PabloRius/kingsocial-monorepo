@@ -1,10 +1,12 @@
 module.exports = {
   projects: ["<rootDir>/packages/*", "<rootDir>/apps/*"],
   testEnvironment: "node",
-  transform: {
-    "^.+\\.tsx?$": "ts-jest",
-  },
   moduleNameMapper: {
     "^@repo/(.*)$": "<rootDir>/packages/$1/src",
   },
+  transform: {
+    "^.+\\.tsx?$": ["ts-jest", { useESM: true }],
+  },
+  extensionsToTreatAsEsm: [".ts"],
+  transformIgnorePatterns: ["node_modules/(?!(@repo)/)"],
 };

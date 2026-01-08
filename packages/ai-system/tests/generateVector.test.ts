@@ -16,6 +16,7 @@ describe("AI System Unit Tests", () => {
     process.env = OLD_ENV;
   });
 
+  // TC-UNIT-AI-01
   it("should return a 384-length float array when given a valid text", async () => {
     const mockVector = new Array(384).fill(0.123);
     (InferenceClient as jest.Mock).mockImplementation(() => ({
@@ -31,6 +32,7 @@ describe("AI System Unit Tests", () => {
     expect(Array.isArray(result)).toBe(true);
   });
 
+  // TC-UNIT-AI-02
   it("should throw a 'missing token' error if HF_TOKEN is missing", async () => {
     delete process.env.HF_TOKEN;
 
