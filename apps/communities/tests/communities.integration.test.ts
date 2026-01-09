@@ -1,4 +1,3 @@
-import { Tests } from "@repo/backend-utils";
 import { prisma } from "@repo/database";
 import { EventCreatePayload } from "@repo/shared-types";
 import * as CommunitiesService from "../src/services/communities.service";
@@ -11,20 +10,25 @@ jest.mock("@repo/ai-system", () => ({
 }));
 
 describe("Communities Component Integration Tests", () => {
-  beforeAll(async () => {
-    await Tests.setupTestDB();
-    await prisma.$connect();
-  });
+  const newCommunities: string[] = [];
+  const newUsers: string[] = [];
   afterAll(async () => {
-    await prisma.$disconnect();
-    await Tests.stopTestDB();
+    await Promise.all(
+      newCommunities.map((communityId) =>
+        prisma.community.delete({ where: { id: communityId } })
+      )
+    );
+    await Promise.all(
+      newUsers.map((userId) => prisma.user.delete({ where: { id: userId } }))
+    );
   });
-
   // TC-INT-SOC-01
   it("should create a JoinRequest linked to both user and community", async () => {
     const user = await prisma.user.create({
       data: { email: "joiner@test.com" },
     });
+    newUsers.push(user.id);
+
     const community = await prisma.community.create({
       data: {
         name: "Private Study Group",
@@ -34,6 +38,7 @@ describe("Communities Component Integration Tests", () => {
         creatorId: "other_user",
       },
     });
+    newCommunities.push(community.id);
 
     await CommunitiesService.requestJoinCommunity(
       community.id,
@@ -54,6 +59,8 @@ describe("Communities Component Integration Tests", () => {
     const user = await prisma.user.create({
       data: { email: "member@test.com" },
     });
+    newUsers.push(user.id);
+
     const community = await prisma.community.create({
       data: {
         name: "Private Study Group",
@@ -63,6 +70,8 @@ describe("Communities Component Integration Tests", () => {
         creatorId: "other_user",
       },
     });
+    newCommunities.push(community.id);
+
     const request = await prisma.communityJoinRequest.create({
       data: { userId: user.id, communityId: community.id, status: "pending" },
     });
@@ -86,6 +95,8 @@ describe("Communities Component Integration Tests", () => {
     const user = await prisma.user.create({
       data: { email: "admin@test.com" },
     });
+    newUsers.push(user.id);
+
     const community = await prisma.community.create({
       data: {
         name: "Private Study Group",
@@ -95,6 +106,7 @@ describe("Communities Component Integration Tests", () => {
         creatorId: "other_user",
       },
     });
+    newCommunities.push(community.id);
 
     await prisma.communityMember.create({
       data: { userId: user.id, communityId: community.id, role: "admin" },
@@ -129,6 +141,8 @@ describe("Communities Component Integration Tests", () => {
     const user = await prisma.user.create({
       data: { email: "creator@test.com" },
     });
+    newUsers.push(user.id);
+
     const community = await prisma.community.create({
       data: {
         name: "Private Study Group",

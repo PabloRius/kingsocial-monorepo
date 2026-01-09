@@ -1,4 +1,3 @@
-import { Tests } from "@repo/backend-utils";
 import { prisma } from "@repo/database";
 import * as ProfileService from "../src/services/profile.service";
 
@@ -9,23 +8,18 @@ jest.mock("@repo/ai-system", () => ({
 }));
 
 describe("Profile Management Integration Tests", () => {
-  beforeAll(async () => {
-    await Tests.setupTestDB();
-    await prisma.$connect();
-  });
-  afterEach(async () => {
-    await prisma.user.deleteMany();
-  });
+  const newUsers: string[] = [];
   afterAll(async () => {
-    await prisma.$disconnect();
-    await Tests.stopTestDB();
+    await Promise.all(
+      newUsers.map((userId) => prisma.user.delete({ where: { id: userId } }))
+    );
   });
-
   // TC-INT-PROF-01
   it("should update user data and automatically trigger embedding recalculation", async () => {
     const user = await prisma.user.create({
       data: { email: "student_a@kingston.ac.uk", biography: "Empty" },
     });
+    newUsers.push(user.id);
 
     const updatedBio =
       "I am interested in Cybersecurity and Python development.";
@@ -62,6 +56,7 @@ describe("Profile Management Integration Tests", () => {
         image: "image",
       },
     });
+    newUsers.push(userA.id);
 
     const userB = await prisma.user.create({
       data: {
@@ -73,6 +68,7 @@ describe("Profile Management Integration Tests", () => {
         image: "image",
       },
     });
+    newUsers.push(userB.id);
 
     jest.spyOn(prisma, "$runCommandRaw").mockResolvedValue({
       cursor: {
