@@ -6,6 +6,13 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
+    "test:unit:AI": "jest generateVector.test.ts",
+    "test:unit:MKT": "jest marketplace.unit.test.ts",
+    "test:integration:MKT": "jest marketplace.integration.test.ts",
+    "test:unit:SOC": "jest communities.unit.test.ts events.unit.test.ts",
+    "test:integration:SOC": "jest communities.integration.test.ts",
+    "test:unit:PRF": "jest profile.unit.test.ts",
+    "test:integration:PRF": "jest profile.integration.test.ts",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "dev": "turbo run dev",

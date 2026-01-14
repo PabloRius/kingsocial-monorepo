@@ -32,7 +32,7 @@ describe("Events Component Unit Tests", () => {
     ).rejects.toThrow("Only admins of a community can create new events");
   });
 
-  // TC-UNIT-SOC-06
+  // TC-UNIT-SOC-07
   it("should throw 400 if user is already a participant", async () => {
     (EventsStore.getById as jest.Mock).mockResolvedValue({
       participants: [{ userId: mockUserId }],
@@ -43,7 +43,7 @@ describe("Events Component Unit Tests", () => {
     ).rejects.toThrow("User is already a participant in this event");
   });
 
-  // TC-UNIT-SOC-07
+  // TC-UNIT-SOC-08
   it("should thow 403 if non-admin tries to delet event", async () => {
     (EventsStore.getById as jest.Mock).mockResolvedValue({
       creatorId: "other",
@@ -55,7 +55,7 @@ describe("Events Component Unit Tests", () => {
     ).rejects.toThrow("Only the admins can delete the event");
   });
 
-  // TC-UNIT-SOC-08
+  // TC-UNIT-SOC-09
   it("should return null if eventId doesn't exist", async () => {
     (EventsStore.getById as jest.Mock).mockResolvedValue(null);
     const result = await EventsService.getEventById("missing");
