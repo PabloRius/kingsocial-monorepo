@@ -36,7 +36,7 @@ export default function ProfilePage({
   params: Promise<{ userId: string }>;
 }) {
   const [profile, setProfile] = useState<ProfileDTO | null | undefined>(
-    undefined
+    undefined,
   );
   const { onlineUsers } = useChat(); // Shared state from provider
   const [activeTab, setActiveTab] = useState("listings");
@@ -81,7 +81,9 @@ export default function ProfilePage({
   }
 
   // --- LOGIC HELPERS ---
-  const products = profile.sellerProfile?.products || [];
+  const products =
+    profile.sellerProfile?.products.filter((prod) => prod.status !== "sold") ||
+    [];
   const joinedCommunitiesCount = profile._count.communities || 0;
 
   const handleShare = () => {
@@ -180,7 +182,7 @@ export default function ProfilePage({
                   <div>
                     <p className="text-xl font-black text-slate-900">
                       {profile.sellerProfile?.products?.filter(
-                        (p) => p.status === "sold"
+                        (p) => p.status === "sold",
                       ).length || 0}
                     </p>
                     <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest">
@@ -298,10 +300,7 @@ export default function ProfilePage({
                   {products.length > 0 ? (
                     products.map((item) => {
                       return (
-                        <Link
-                          key={item.id}
-                          href={`/marketplace/item/${item.id}`}
-                        >
+                        <Link key={item.id} href={`/marketplace/${item.id}`}>
                           <Card className="group p-4 border-none shadow-sm hover:shadow-md transition-all rounded-2xl bg-white border border-slate-100 overflow-hidden relative">
                             <div className="flex items-center gap-4">
                               {/* Product Image */}
@@ -393,7 +392,7 @@ export default function ProfilePage({
                                 <span className="text-[10px] text-slate-400">
                                   Joined{" "}
                                   {new Date(
-                                    membership.joinedAt
+                                    membership.joinedAt,
                                   ).toLocaleDateString(undefined, {
                                     month: "short",
                                     year: "numeric",
